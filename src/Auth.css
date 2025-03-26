@@ -139,3 +139,26 @@
     font-size: 13px; /* small */
     margin-top: 5px; /* little gap */
   }
+
+  /* container for checkbox for each preference */
+  .checkbox-grid {
+    display: grid; /* grid layout */
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* creating 2 equal-width cols */
+    gap: 12px; /* space between grid items */
+    margin: 20px 0; /* add vertical spacing */
+  }
+  
+  /* individual checkbox item */
+  .checkbox-item {
+    display: flex; /* align checkbox */
+    align-items: center; /* center items vertically */
+    gap: 8px; /* space between checkbox and label */
+    font-size: 14px; /* set font size for checkbox labels */
+  }
+  
+  /* container for action buttons */
+  .button-row {
+    display: flex; /* arrange buttons in row */
+    justify-content: space-between; /* push button to ends of container */
+    margin-top: 20px; /* add spacing */
+  }
