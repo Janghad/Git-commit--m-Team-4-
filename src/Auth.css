@@ -1,0 +1,141 @@
+/* sets up full screen layout */
+.auth-container {
+    display: flex; /* puts everything side by side or stacked */
+    justify-content: center; /* centers side to side */
+    align-items: center; /* centers top to bottom */
+    min-height: 100vh; /* takes up whole screen */
+    background: linear-gradient(to bottom, #e6f1f6, #ffffff); /* light gradient bg */
+  }
+  
+  /* box that holds form and text */
+  .auth-card {
+    background-color: white; /* white background for card */
+    padding: 30px; /* space inside box */
+    border-radius: 10px; /* rounded corners */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* soft shadow for depth */
+    width: 100%; /* takes full width of container */
+    max-width: 400px; /* but never wider than 400px */
+    display: flex; /* layout the inner content */
+    flex-direction: column; /* stack vertically */
+    align-items: center; /* center everything horizontally */
+  }
+  
+  /* title style */
+  .auth-title {
+    font-size: 24px; /* bigger text */
+    text-align: center; /* center text */
+    font-weight: bold; /* bold title */
+    color: black; /* make title visible */
+    margin-bottom: 5px; /* little space below */
+  }
+  
+  /* subtitle / paragraph under title */
+  .auth-description {
+    font-size: 14px; /* small font */
+    color: black; /* changed from light gray to black */
+    text-align: center; /* center it */
+    margin-bottom: 20px; /* space under it */
+  }
+  
+  /* round circle logo */
+  .logo-circle {
+    width: 64px; /* width of circle */
+    height: 64px; /* height of circle */
+    background-color: #003366; /* dark blue color */
+    border-radius: 9999px; /* makes it fully round */
+    display: flex; /* center stuff inside */
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px; /* center horizontally and give bottom space */
+  }
+  
+  /* letters inside logo */
+  .logo-text {
+    color: white; /* white text */
+    font-weight: bold; /* bold */
+    font-size: 20px; /* bigger size */
+  }
+  
+  /* labels for inputs */
+  label {
+    display: block; /* makes label full width */
+    margin-top: 15px; /* space above label */
+    font-weight: bold; /* make it pop */
+    color: black; /* make sure it's visible */
+  }
+  
+  /* input boxes for email, password, etc */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    width: 100%; /* full width */
+    padding: 8px; /* space inside box */
+    margin-top: 5px; /* little space above box */
+    border: 1px solid #ccc; /* gray border */
+    border-radius: 5px; /* slight rounding */
+    color: black; /* make sure typed text is visible */
+  }
+  
+  /* placeholder text inside inputs */
+  input::placeholder {
+    color: #444; /* make placeholder text dark enough to see */
+  }
+  
+  /* row that holds first + last name side by side */
+  .form-row {
+    display: grid; /* grid lets us put two inputs next to each other */
+    grid-template-columns: 1fr 1fr; /* split evenly in half */
+    gap: 16px; /* space between columns */
+  }
+  
+  /* radio buttons wrapper */
+  .radio-group {
+    margin-top: 10px; /* space above group */
+  }
+  
+  /* styling for each radio label */
+  .radio-group label {
+    display: flex; /* puts circle and text side by side */
+    align-items: center; /* align vertically */
+    margin-bottom: 5px; /* space between choices */
+    color: black; /* fix faded text */
+  }
+  
+  /* all buttons (login, signup, etc) */
+  .auth-btn {
+    margin-top: 20px; /* space above button */
+    width: 100%; /* full width */
+    padding: 10px; /* size inside button */
+    background-color: white; /* white bg by default */
+    color: #003366; /* dark blue text */
+    border: 1px solid #003366; /* blue border */
+    border-radius: 5px; /* soft edges */
+    cursor: pointer; /* mouse becomes pointer */
+  }
+  
+  /* special class for blue button */
+  .auth-btn.primary {
+    background-color: #003366; /* dark blue bg */
+    color: white; /* white text */
+  }
+  
+  /* button hover effect */
+  .auth-btn:hover {
+    background-color: #0055a5; /* lighter blue on hover */
+    color: white; /* keep white text */
+  }
+  
+  /* little text under form for links */
+  .signup-link {
+    text-align: center; /* center the text */
+    margin-top: 15px; /* space above it */
+    font-size: 14px; /* small text */
+    color: black; /* make it readable */
+  }
+  
+  /* error message for invalid email */
+  .error-msg {
+    color: red; /* red text */
+    font-size: 13px; /* small */
+    margin-top: 5px; /* little gap */
+  }
