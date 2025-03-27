@@ -35,7 +35,7 @@ const Signup = () => {
       <div className="auth-card">
         <h2>Create an Account</h2>
         <p className="auth-description">
-          join spark!bytes to access free food across bu campus
+          join spark!bytes to access free food across the bu campus
         </p>
 
         <form onSubmit={handleSubmit}>
