@@ -41,7 +41,7 @@
   .logo-circle {
     width: 64px; /* width of circle */
     height: 64px; /* height of circle */
-    background-color: #003366; /* dark blue color */
+    background-color: #cc0000; /* bu red color */
     border-radius: 9999px; /* makes it fully round */
     display: flex; /* center stuff inside */
     align-items: center;
@@ -69,8 +69,8 @@
   input[type="password"],
   input[type="text"] {
     width: 100%; /* full width */
-    padding: 8px; /* space inside box */
-    margin-top: 5px; /* little space above box */
+    padding: 16px; /* space inside box */
+    margin-top: 8px; /* little space above box */
     border: 1px solid #ccc; /* gray border */
     border-radius: 5px; /* slight rounding */
     color: black; /* make sure typed text is visible */
@@ -107,21 +107,21 @@
     width: 100%; /* full width */
     padding: 10px; /* size inside button */
     background-color: white; /* white bg by default */
-    color: #003366; /* dark blue text */
-    border: 1px solid #003366; /* blue border */
+    color: #ff1a1a; /* bu red text */
+    border: 1px solid #ff1a1a; /* same red border */
     border-radius: 5px; /* soft edges */
     cursor: pointer; /* mouse becomes pointer */
   }
   
   /* special class for blue button */
   .auth-btn.primary {
-    background-color: #003366; /* dark blue bg */
+    background-color: #ff1a1a; /* bright red bg */
     color: white; /* white text */
   }
   
   /* button hover effect */
   .auth-btn:hover {
-    background-color: #0055a5; /* lighter blue on hover */
+    background-color: #cc0000; /* bu/darker red on hover */
     color: white; /* keep white text */
   }
   
@@ -161,4 +161,9 @@
     display: flex; /* arrange buttons in row */
     justify-content: space-between; /* push button to ends of container */
     margin-top: 20px; /* add spacing */
+  }
+
+  /* arial font for whole page */
+  body {
+    font-family: Arial, sans-serif;
   }
