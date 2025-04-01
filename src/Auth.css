@@ -4,7 +4,7 @@
     justify-content: center; /* centers side to side */
     align-items: center; /* centers top to bottom */
     min-height: 100vh; /* takes up whole screen */
-    background: linear-gradient(to bottom, #e6f1f6, #ffffff); /* light gradient bg */
+    background-color: #cc0000; /* bu red bg */
   }
   
   /* box that holds form and text */
