@@ -97,3 +97,44 @@ These packages provide TypeScript type definitions for:
 - `npm run start`: Start production server
 - `npm run lint`: Run ESLint
 - `npm run test`: Run tests
+
+## Mapbox Integration
+
+The project uses Mapbox GL JS for interactive campus mapping and event visualization. The map component provides real-time updates of food events and building statuses across the BU campus.
+
+### Mapbox Features
+- Interactive campus map with custom styling
+- Real-time event markers with status indicators
+- Dynamic lighting based on time of day (dawn, day, dusk, night)
+- User location tracking
+- Building status visualization
+- Custom markers for different event types
+
+### Setup
+1. Create a Mapbox account and obtain an access token
+2. Add your Mapbox token to `.env.local`:
+   ```
+   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
+   ```
+
+### Map Component Usage
+```typescript
+import Map from '@/components/map/Map';
+
+// Example usage
+<Map 
+  events={events}
+  onMarkerClick={(eventId) => handleMarkerClick(eventId)}
+  userPos={[latitude, longitude]}
+/>
+```
+
+### Map Status Indicators
+- 🟢 Green: Available events/food
+- 🟡 Amber: Upcoming events
+- 🔴 Red: Unavailable/closed events
+
+### Map Controls
+- Reset View: Returns to default campus view
+- Time-based Lighting: Automatically adjusts map lighting based on time of day
+- Interactive Markers: Click markers to view event details
