@@ -150,6 +150,19 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             const el = document.createElement("div");
             el.className = getColorByStatus(event.status);
 
+            // Add tooltip on hover
+            const tooltip = new mapboxgl.Popup({
+                offset: 15,
+                closeButton: false,
+                className: "bg-zinc-800/90 px-3 py-2 rounded-lg shadow-lg"
+            }).setHTML(`
+                <div class="text-white">
+                    <h3 class="font-semibold">${event.title}</h3>
+                    <p class="text-sm text-zinc-300">${event.location}</p>
+                    <p class="text-sm text-zinc-300">${event.time}</p>
+                </div>
+            `);
+
             el.addEventListener("click", () => {
                 onMarkerClick(event.id);
             });
@@ -157,6 +170,7 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             if (event.coords) {
                 const marker = new mapboxgl.Marker(el)
                     .setLngLat(event.coords)
+                    .setPopup(tooltip)
                     .addTo(mapRef.current!);
                 
                 markersRef.current.push(marker);
@@ -168,18 +182,41 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             const userMarkerEl = document.createElement("div");
             userMarkerEl.className = "h-3 w-3 border-[1.5px] border-zinc-50 rounded-full bg-blue-400 shadow-[0px_0px_4px_2px_rgba(14,165,233,1)]";
 
+            // Add user location popup
+            const userPopup = new mapboxgl.Popup({
+                offset: 15,
+                closeButton: false,
+                className: "bg-zinc-800/90 px-3 py-2 rounded-lg shadow-lg"
+            }).setHTML(`
+                <div class="text-white">
+                    <p class="font-semibold">Your Location</p>
+                </div>
+            `);
+
             const userMarker = new mapboxgl.Marker(userMarkerEl)
                 .setLngLat(userPos)
+                .setPopup(userPopup)
                 .addTo(mapRef.current);
             
             markersRef.current.push(userMarker);
+
+            // Fly to user location if it's the first time we're getting it
+            const currentCenter = mapRef.current.getCenter();
+            if (currentCenter.lng !== userPos[0] || currentCenter.lat !== userPos[1]) {
+                mapRef.current.flyTo({
+                    center: userPos,
+                    zoom: 15,
+                    essential: true,
+                    duration: 1000
+                });
+            }
         }
 
         return () => {
             markersRef.current.forEach(marker => marker.remove());
             markersRef.current = [];
         };
-    }, [events, onMarkerClick, userPos]); // Only re-run when these props change
+    }, [events, onMarkerClick, userPos]);
 
     return (
         <div className="h-[60vh] sm:w-full sm:h-full relative bg-red-500/0 rounded-[20px] p-2 sm:p-0">
