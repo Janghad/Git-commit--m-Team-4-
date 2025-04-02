@@ -30,7 +30,7 @@ import "../../Auth.css" // custom styling for layout, inputs, buttons, etc
  * )
  */
 const Signup = () => {
-  console.log(supabase)
+  console.log(supabase) //In order to test endpoint
   const router = useRouter() // used for redirecting the user after signup
 
   // storing form values in state
@@ -38,23 +38,73 @@ const Signup = () => {
   const [emailError, setEmailError] = useState("") // shows error if not @bu.edu
   const [userType, setUserType] = useState("student") // default radio button
 
+
+  //Google Login Handler
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "http://localhost:3000/auth/callback", 
+      },
+    });
+  
+    if (error) {
+      console.error("Google Auth Error:", error.message);
+      alert("Google login failed");
+    }
+  };
   /**
    * Handles form submission for signup
    * Validates the email domain and redirects based on user type
    * 
    * @param {React.FormEvent} e - The form submission event
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault() // stop page from refreshing
 
     // check if email ends with @bu.edu
     if (!email.endsWith("@bu.edu")) {
       setEmailError("Email must end in @bu.edu")
-      return
+      return;
     }
 
     // if email is fine, clear any error
     setEmailError("")
+
+    //Get values from form
+    const password = document.getElementById("password")
+    const confirmPassword = document.getElementById("confirmPassword".value);
+    const firstName = document.getElementById("firstName").value;
+    const lastName = document.getElementById("lastName").value;
+
+    if (password !== confirmPassword) {
+      alert("Passwords do not match. Please try again.")
+      return;
+    }
+
+    //Signing up with Google Authentication
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+    
+    if (error) {
+      console.error("Signup error. Please try again.", error.message);
+      alert("Signup failed: " + error.message);
+      return;
+    }
+
+    //Inserts unknown user data into profile table
+    const {profile} = data;
+    await supabase.from("profiles").insert ([
+      {
+        email: profile.email,
+        user_type: userType,
+        first_name: firstName,
+        last_Name: lastName,
+        auth_id: userType.id,
+      },
+    ])
 
     // redirect based on whether they're a student or faculty
     if (userType === "student") router.push("/dietary-preferences")
@@ -181,6 +231,15 @@ const Signup = () => {
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-zinc-800 transition-colors duration-200"
           >
             Create Account
+          </button>
+
+          {/*Temp button for google authenticate*/}
+          <button
+            type="button"
+            onClick= {handleGoogleLogin}
+            className="w-full mt-4 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-zinc-800 transition-colors duration-200"
+          >
+            Continue with Google
           </button>
 
           <p className="text-center text-sm text-zinc-400">
