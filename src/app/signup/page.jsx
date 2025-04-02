@@ -1,4 +1,5 @@
 "use client" // enables client-side logic and hooks like useState
+import supabase from "../../lib/supabaseClient";
 
 import { useState } from "react" // allows us to save what the user types
 import { useRouter } from "next/navigation" // replaces useNavigate in next.js
@@ -29,6 +30,7 @@ import "../../Auth.css" // custom styling for layout, inputs, buttons, etc
  * )
  */
 const Signup = () => {
+  console.log(supabase)
   const router = useRouter() // used for redirecting the user after signup
 
   // storing form values in state
