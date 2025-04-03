@@ -29,6 +29,9 @@ import "../../Auth.css" // custom styling for layout, inputs, buttons, etc
  *   <Signup />
  * )
  */
+
+// this file is for the signup page where people can make a new account
+// we let them type in their info, check that it’s a bu email, and then sign them up
 const Signup = () => {
   console.log(supabase) //In order to test endpoint
   const router = useRouter() // used for redirecting the user after signup
@@ -40,17 +43,19 @@ const Signup = () => {
 
 
   //Google Login Handler
+  // this is what happens if someone tries to sign in with google instead of the normal form
+
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000/auth/callback", 
+        redirectTo: "http://localhost:3000/auth/callback", // this is where google sends them after
       },
     });
   
     if (error) {
       console.error("Google Auth Error:", error.message);
-      alert("Google login failed");
+      alert("Google login failed"); // something went wrong, just tell them
     }
   };
   /**
@@ -83,6 +88,7 @@ const Signup = () => {
     }
 
     //Signing up with Google Authentication
+    // try to sign up using supabase (email + password)
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
@@ -95,6 +101,7 @@ const Signup = () => {
     }
 
     //Inserts unknown user data into profile table
+    // if signup worked, store extra info like name and user type in the profile table
     const {profile} = data;
     await supabase.from("profiles").insert ([
       {
@@ -112,13 +119,16 @@ const Signup = () => {
   }
 
   return (
+    // page layout stuff
     <div className="min-h-screen bg-zinc-900 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-8 bg-zinc-800 p-8 rounded-2xl shadow-xl">
-        {/* Logo */}
+        
+        {/* logo at the top */}
         <div className="mx-auto h-16 w-16 bg-green-500/10 rounded-full flex items-center justify-center">
           <span className="text-green-500 text-2xl font-bold">S!B</span>
         </div>
 
+        {/* heading and description */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white">Create Account</h2>
           <p className="mt-2 text-sm text-zinc-400">
@@ -126,8 +136,10 @@ const Signup = () => {
           </p>
         </div>
 
+        {/* signup form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {/* Name Fields */}
+          
+          {/* name inputs/fields - first and last name side by side */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-zinc-300">
@@ -153,7 +165,7 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* Email Input */}
+          {/* email input/field, shows an error if it's not a bu email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
               BU Email
@@ -172,7 +184,7 @@ const Signup = () => {
             )}
           </div>
 
-          {/* Password Fields */}
+          {/* Password Fields and confirm password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
               Password
@@ -197,7 +209,7 @@ const Signup = () => {
             />
           </div>
 
-          {/* Role Selection */}
+          {/* radio buttons for picking if they're a student or faculty */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-zinc-300">
               I am a:
@@ -226,6 +238,7 @@ const Signup = () => {
             </div>
           </div>
 
+          {/* this button triggers the signup form */}
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-zinc-800 transition-colors duration-200"
@@ -233,7 +246,7 @@ const Signup = () => {
             Create Account
           </button>
 
-          {/*Temp button for google authenticate*/}
+          {/*Temp button for google authenticate / google login instead*/}
           <button
             type="button"
             onClick= {handleGoogleLogin}
@@ -242,6 +255,7 @@ const Signup = () => {
             Continue with Google
           </button>
 
+          {/* link to go to login page if they already signed up */}
           <p className="text-center text-sm text-zinc-400">
             Already have an account?{" "}
             <a href="/login" className="font-medium text-green-500 hover:text-green-400">

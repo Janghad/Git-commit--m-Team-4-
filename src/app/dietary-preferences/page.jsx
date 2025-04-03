@@ -81,6 +81,7 @@ const DietaryPreferences = () => {
   }
 
   return (
+    // outer container that centers everything and makes it look nice
     <div className="min-h-screen bg-zinc-900 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-8 bg-zinc-800 p-8 rounded-2xl shadow-xl">
         {/* Logo */}
@@ -88,6 +89,7 @@ const DietaryPreferences = () => {
           <span className="text-green-500 text-2xl font-bold">S!B</span>
         </div>
 
+        {/* title and little instruction text */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white">Dietary Preferences</h2>
           <p className="mt-2 text-sm text-zinc-400">
@@ -95,8 +97,10 @@ const DietaryPreferences = () => {
           </p>
         </div>
 
+        {/* form with the checkboxes and buttons */}
         <form onSubmit={handleSave} className="mt-8 space-y-6">
-          {/* Preferences Grid */}
+
+          {/* grid of all the dietary options */}
           <div className="grid grid-cols-2 gap-4">
             {dietaryOptions.map((pref) => (
               <label
@@ -104,6 +108,7 @@ const DietaryPreferences = () => {
                 className="relative flex items-start cursor-pointer group"
               >
                 <div className="flex items-center h-5">
+                  {/* checkbox that gets checked if it’s in the selected list */}
                   <input
                     type="checkbox"
                     checked={selectedPrefs.includes(pref)}
@@ -111,6 +116,7 @@ const DietaryPreferences = () => {
                     className="h-4 w-4 text-green-500 border-zinc-600 rounded bg-zinc-700 focus:ring-green-500 focus:ring-offset-zinc-800"
                   />
                 </div>
+                {/* name of the dietary preference */}
                 <div className="ml-3 text-sm">
                   <span className="text-zinc-300 group-hover:text-zinc-200">
                     {pref}
@@ -121,6 +127,7 @@ const DietaryPreferences = () => {
           </div>
 
           {/* Action Buttons */}
+           {/* buttons to either skip or save preferences */}
           <div className="flex gap-4">
             <button
               type="button"

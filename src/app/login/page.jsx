@@ -1,5 +1,8 @@
 "use client" // tells next.js this page uses client-side interactivity (hooks, etc)
 
+// ok so this file is for the login page and it’s gonna let users sign in
+// we’re using react hooks and next.js router stuff here
+
 import { useState } from "react" // allows us to store input values
 import { useRouter } from "next/navigation" // this replaces useNavigate in next.js
 import "../../Auth.css" // brings in all the styles from your auth.css file
@@ -22,6 +25,9 @@ import "../../Auth.css" // brings in all the styles from your auth.css file
  *   <Login />
  * )
  */
+
+// okay here we go, we’re setting up the stuff we need to store user input
+// like email, password, and whether they’re a student or faculty
 const Login = () => {
   const router = useRouter() // this lets us manually redirect the user
 
@@ -37,6 +43,9 @@ const Login = () => {
    * @param {React.FormEvent} e - The form submission event
    */
   const handleSubmit = (e) => {
+    // when the form gets submitted we stop it from refreshing the page
+    // then we just check if the user is a student or not and send them to the right place
+
     e.preventDefault() // stop the page from refreshing
 
     // check what kind of user they are and redirect them
@@ -45,9 +54,11 @@ const Login = () => {
   }
 
   return (
+    // this is the outer container that centers everything and makes it look nice on all screen sizes
     <div className="min-h-screen bg-zinc-900 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full space-y-8 bg-zinc-800 p-8 rounded-2xl shadow-xl">
         {/* Logo */}
+        {/* just a little green circle with the sparkbytes logo in the middle to make it look cool */}
         <div className="mx-auto h-16 w-16 bg-green-500/10 rounded-full flex items-center justify-center">
           <span className="text-green-500 text-2xl font-bold">S!B</span>
         </div>
@@ -60,6 +71,7 @@ const Login = () => {
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="space-y-4">
             {/* Email Input */}
+            {/* here’s the email field. it shows the label, the input box, and tracks what the user types */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
                 Email
@@ -76,6 +88,7 @@ const Login = () => {
             </div>
 
             {/* Password Input */}
+            {/* same deal for password — we’re keeping track of it in state too */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
                 Password
@@ -91,6 +104,8 @@ const Login = () => {
             </div>
 
             {/* Role Selection */}
+            {/* okay this is where they pick if they’re a student or faculty */}
+            {/* we default it to student at the top but they can change it here */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-zinc-300">
                 I am a:
@@ -119,7 +134,7 @@ const Login = () => {
               </div>
             </div>
           </div>
-
+          {/* this button sends the form — it triggers handleSubmit up above */}
           <button
             type="submit"
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-zinc-800 transition-colors duration-200"
@@ -127,6 +142,7 @@ const Login = () => {
             Sign In
           </button>
 
+          {/* little message at the bottom in case someone doesn’t have an account yet */}
           <p className="text-center text-sm text-zinc-400">
             Don't have an account?{" "}
             <a href="/signup" className="font-medium text-green-500 hover:text-green-400">
