@@ -4,6 +4,7 @@ import React from 'react';
 import Map from '@/components/map/Map';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { Event } from '@/types/map';
+import NavBar from '@/components/navigation/NavBar';
 
 // Mock events data - replace with real data later
 const mockEvents: Event[] = [
@@ -40,7 +41,13 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="flex h-screen bg-zinc-900">
+        // 1. Use flex-col so the NavBar is stacked above the rest of the page, before it messed up everything
+        <div className="flex flex-col h-screen bg-zinc-900">
+            {/* NavBar at the top */}
+            <NavBar />
+            
+            {/* 2. Wrap sidebar + main content in their own horizontal flex container */}
+            <div className="flex flex-1">
             {/* Sidebar */}
             <div className="w-64 bg-zinc-800 p-6 flex flex-col">
                 <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
@@ -134,6 +141,7 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 } 

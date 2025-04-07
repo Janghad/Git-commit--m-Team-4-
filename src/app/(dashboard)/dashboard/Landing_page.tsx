@@ -44,6 +44,8 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Nav Bar at the top */}
+      <NavBar />
       {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg">
         <div className="p-6">
