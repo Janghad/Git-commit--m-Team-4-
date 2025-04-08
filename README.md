@@ -17,6 +17,7 @@ src/
 │   └── api/               # API routes
 ├── components/            # Reusable UI components
 │   ├── common/           # Shared components (buttons, inputs, etc.)
+│   │   └── AddEventModal.tsx # Modal for creating new events
 │   ├── food/             # Food-related components
 │   ├── layout/           # Layout components (header, footer, etc.)
 │   └── notifications/    # Notification components
@@ -138,3 +139,78 @@ import Map from '@/components/map/Map';
 - Reset View: Returns to default campus view
 - Time-based Lighting: Automatically adjusts map lighting based on time of day
 - Interactive Markers: Click markers to view event details
+
+## Add Event Feature
+
+The Add Event feature allows faculty and administrators to create new food events through an intuitive modal interface. This feature is integrated into the dashboard and provides a seamless way to manage campus food events.
+
+### Features
+- Modal-based event creation form
+- Real-time form validation
+- Multiple food offering selection
+- Location input with autocomplete
+- Time and date selection
+- Responsive design
+- Accessibility support
+
+### Component Usage
+```typescript
+import AddEventModal from '@/components/common/AddEventModal';
+
+// Example usage
+<AddEventModal
+  isOpen={isModalOpen}
+  onClose={() => setIsModalOpen(false)}
+  onSubmit={(eventData) => handleEventCreation(eventData)}
+/>
+```
+
+### Form Fields
+1. **Event Title**
+   - Required field
+   - Text input with validation
+   - Maximum length: 100 characters
+
+2. **Event Time**
+   - Required field
+   - DateTime picker
+   - Future dates only
+
+3. **Food Offerings**
+   - Required field
+   - Multiple selection dropdown
+   - Options: Snacks, Lunch, Beverages, Dessert
+
+4. **Location**
+   - Required field
+   - Text input with validation
+   - Autocomplete suggestions (future enhancement)
+
+### Validation Rules
+- All fields are required
+- Event title must be between 3-100 characters
+- Event time must be in the future
+- At least one food offering must be selected
+- Location must be a valid campus location
+
+### Accessibility Features
+- ARIA labels for all form fields
+- Error messages with proper ARIA attributes
+- Keyboard navigation support
+- Focus management
+- Screen reader compatibility
+
+### Styling
+- Consistent with application theme
+- Responsive design for all screen sizes
+- Clear visual feedback for validation states
+- Smooth animations and transitions
+- Proper contrast ratios for accessibility
+
+### Integration
+The Add Event feature is integrated with:
+- Dashboard navigation
+- Map component for location visualization
+- Event list for immediate updates
+- Form validation system
+- Error handling system
