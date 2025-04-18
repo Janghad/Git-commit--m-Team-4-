@@ -1,9 +1,11 @@
 "use client"; // this tells next.js that this file runs on the client side
 
 // import the useState hook to manage state in our component
-import { useState } from "react";
+import { useEffect, useState } from "react";
 // import the useRouter hook from next.js to change pages (redirect)
 import { useRouter } from "next/navigation";
+
+import supabase from "@/lib/supabaseClient";
 
 /**
  * navbar component
