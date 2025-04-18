@@ -3,8 +3,9 @@
 // ok so this file is for the login page and it’s gonna let users sign in
 // we’re using react hooks and next.js router stuff here
 
-import { useState } from "react" // allows us to store input values
+import { useState, useEffect } from "react" // allows us to store input values
 import { useRouter } from "next/navigation" // this replaces useNavigate in next.js
+import supabase from "../../lib/supabaseClient" // this links the supabase database to work for our login page
 import "../../Auth.css" // brings in all the styles from your auth.css file
 
 /**
@@ -36,6 +37,40 @@ const Login = () => {
   const [password, setPassword] = useState("")
   const [userType, setUserType] = useState("student") // default selection
 
+  //Handles Google authentication for login
+  const handleGoogleLogin = async () => {
+    const {error} = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: "http://localhost:3000/api/auth/callback", // specify the callback URL
+      }, 
+    })
+    if (error) console.error("Error with Google authentication", error.message)
+  }
+
+  //Checks if the user is already in the DB
+  useEffect (() => {
+    const checkUserExists = async () => {
+      const {data: {user}} = await supabase.auth.getUser()
+      if (!user) return 
+
+      const {data: existing} = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("email", user.email)
+        .maybeSingle() //refernced ChatGPT to test user's existence
+
+      if (existing) {
+        router.push("/dashboard")
+      } else {
+        // Debug: log what's happening
+        console.log("No existing user found:", user.email)
+        router.push("/signup")
+      }
+    }
+
+    checkUserExists()
+  }, [router])
   /**
    * Handles form submission for login
    * Validates the form and redirects based on user type
@@ -141,6 +176,16 @@ const Login = () => {
           >
             Sign In
           </button>
+
+          {/*Google Authentication Button*/}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full mt-4 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
+          >
+            Continue with Google
+          </button>
+
 
           {/* little message at the bottom in case someone doesn’t have an account yet */}
           <p className="text-center text-sm text-zinc-400">

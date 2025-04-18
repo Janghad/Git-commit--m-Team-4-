@@ -49,7 +49,7 @@ const Signup = () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000/auth/callback", // this is where google sends them after
+        redirectTo: "http://localhost:3000/api/auth/callback", // this is where google sends them after
       },
     });
   
@@ -77,8 +77,8 @@ const Signup = () => {
     setEmailError("")
 
     //Get values from form
-    const password = document.getElementById("password")
-    const confirmPassword = document.getElementById("confirmPassword".value);
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
     const firstName = document.getElementById("firstName").value;
     const lastName = document.getElementById("lastName").value;
 
@@ -99,24 +99,34 @@ const Signup = () => {
       alert("Signup failed: " + error.message);
       return;
     }
-
-    //Inserts unknown user data into profile table
-    // if signup worked, store extra info like name and user type in the profile table
-    const {profile} = data;
-    await supabase.from("profiles").insert ([
-      {
-        email: profile.email,
-        user_type: userType,
-        first_name: firstName,
-        last_Name: lastName,
-        auth_id: userType.id,
-      },
-    ])
-
+    
+    const { user } = data;
+    console.log("Authenticated user:", user);
+    
+    const profileData = {
+      auth_id: user.id,
+      email: user.email,
+      full_name: `${firstName} ${lastName}`,  
+      role: userType,
+      dietary_preferences: []
+    };
+    
+    console.log("Inserting profile data:", profileData);
+    
+    const { error: insertError } = await supabase.from("profiles").insert([ profileData ]);
+    
+    if (insertError) {
+      console.error("Error inserting profile:", insertError.message);
+      alert("There was an error saving your profile data.");
+      return;
+    }
+    
+    console.log("Profile inserted successfully!");
+    
     // redirect based on whether they're a student or faculty
     if (userType === "student") router.push("/dietary-preferences")
     else router.push("/dashboard")
-  }
+  } 
 
   return (
     // page layout stuff

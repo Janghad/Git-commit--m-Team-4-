@@ -6,6 +6,14 @@ import Map from '@/components/map/Map';
 import LocationPrompt from '@/components/common/LocationPrompt';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { Event } from '@/types/map';
+import { createBrowserClient } from '@supabase/ssr' //helps with mamaging user session
+
+export const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+
 
 // Mock events data - replace with real data later
 const mockEvents: Event[] = [
