@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 // import supabase client
 import supabase from "@/lib/supabaseClient";
+import SettingsModal from "@/components/common/SettingsModal";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 
 /**
  * NavBar Component
@@ -13,7 +15,7 @@ import supabase from "@/lib/supabaseClient";
  * This component shows a horizontal navigation bar at the top of the dashboard with:
  * - User profile section (left): Displays user initials in a green circle and full name
  * - Spark!Bytes logo (center): Displayed in green to match the application's theme
- * - Settings button (right): Opens a dropdown menu with user options
+ * - Settings button (right): Opens a settings modal with user account options
  * 
  * Styling Notes:
  * - Uses a zinc-900 background with a subtle zinc-800 bottom border for visual separation
@@ -31,10 +33,11 @@ const NavBar = () => {
   // set up state for the username
   const [userName, setUserName] = useState("Loading");
   const [userInitials, setUserInitials] = useState("U");
+  const [userEmail, setUserEmail] = useState("");
 
   //utlizing useEffect to fetch the user name
   useEffect(() => {
-    const fetchUserName = async () => {
+    const fetchUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
@@ -46,6 +49,7 @@ const NavBar = () => {
 
         if (data && !error) {
           setUserName(data.full_name);
+          setUserEmail(user.email);
           // Generate initials from full name
           const initials = data.full_name
             .split(' ')
@@ -61,6 +65,7 @@ const NavBar = () => {
                               userData.user.email?.split('@')[0] || 
                               "User";
             setUserName(displayName);
+            setUserEmail(userData.user.email);
             setUserInitials(displayName[0].toUpperCase());
           } else {
             setUserName("User");
@@ -70,7 +75,7 @@ const NavBar = () => {
       }
     };
 
-    fetchUserName();
+    fetchUserData();
   }, []);
 
   // this function toggles the settings dropdown between open and closed
@@ -86,9 +91,19 @@ const NavBar = () => {
     router.push("/dietary-preferences"); // this changes the page to the dietary preferences route
   };
 
+  /**
+   * Enhanced sign out functionality:
+   * - Added error handling to handleSignOut function
+   * - Connected handleSignOut to SettingsModal
+   * - Improved user flow with proper error handling
+   */
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
+    try {
+      await supabase.auth.signOut();
+      router.push("/login");
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const navLinks = [
@@ -99,41 +114,42 @@ const NavBar = () => {
   ];
 
   return (
-    // Navigation bar container with consistent dark theme styling
-    <nav className="w-full bg-zinc-900 text-white px-6 py-3 flex items-center justify-between relative border-b border-zinc-800">
-      {/* User Profile Circle - Using green-400 to match application's accent color */}
-      <div className="flex items-center">
-        <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-sm font-medium">
-          {userInitials}
+    <>
+      <nav className="w-full bg-zinc-900 text-white px-6 py-3 flex items-center justify-between relative border-b border-zinc-800">
+        {/* User Profile Circle - Using green-400 to match application's accent color */}
+        <div className="flex items-center">
+          <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-sm font-medium">
+            {userInitials}
+          </div>
+          <span className="ml-3 font-semibold">{userName}</span>
         </div>
-        <span className="ml-3 font-semibold">{userName}</span>
-      </div>
 
-      {/* Spark!Bytes Logo - Centered with permanent green-400 color for brand consistency */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-green-400">
-        Spark!Bytes
-      </div>
+        {/* Spark!Bytes Logo - Centered with permanent green-400 color for brand consistency */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-green-400">
+          Spark!Bytes
+        </div>
 
-      {/* Settings dropdown container */}
-      <div className="relative">
+        {/* Settings Button */}
         <button
-          onClick={toggleSettings}
-          className="bg-zinc-800 px-4 py-2 rounded hover:bg-zinc-700 focus:outline-none transition-colors"
+          onClick={() => setIsSettingsOpen(true)}
+          className="bg-zinc-800 px-4 py-2 rounded hover:bg-zinc-700 focus:outline-none transition-colors flex items-center gap-2"
         >
+          <Cog6ToothIcon className="h-5 w-5" />
           Settings
         </button>
-        {isSettingsOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-zinc-800 rounded shadow-lg z-10">
-            <button
-              onClick={handleChangeDietaryPreferences}
-              className="w-full text-left px-4 py-2 hover:bg-zinc-700 text-white transition-colors"
-            >
-              Change Dietary Preferences
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
+      </nav>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        userData={{
+          username: userName,
+          email: userEmail
+        }}
+        onSignOut={handleSignOut}
+      />
+    </>
   );
 };
 
