@@ -1,5 +1,5 @@
 "use client";
-
+//test
 import React, { useState, useEffect } from 'react';
 import Map from '@/components/map/Map';
 import { useUserLocation } from '@/hooks/useUserLocation';
@@ -8,6 +8,7 @@ import NavBar from '@/components/navigation/NavBar';
 import AddEventModal from '@/components/common/AddEventModal';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import supabase from "@/lib/supabaseClient";
+import Link from 'next/link';
 
 // Mock events data - replace with real data later
 const mockEvents: Event[] = [
