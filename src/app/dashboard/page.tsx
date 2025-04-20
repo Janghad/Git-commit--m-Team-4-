@@ -1,16 +1,39 @@
 "use client";
-//test
+
+/**
+ * Dashboard Page Component
+ * 
+ * Main dashboard interface for the Spark!Bytes application. This component integrates
+ * various features including:
+ * - Simplified navigation sidebar
+ * - Interactive map display
+ * - Real-time event listing
+ * - Event creation functionality
+ * 
+ * Recent Updates:
+ * - Removed unused navigation items (Nearby Events, Upcoming Events)
+ * - Implemented direct home navigation to landing page
+ * - Streamlined sidebar to essential functions only
+ * - Updated button styling for consistency
+ * 
+ * @component
+ */
+
 import React, { useState, useEffect } from 'react';
 import Map from '@/components/map/Map';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { Event } from '@/types/map';
 import NavBar from '@/components/navigation/NavBar';
 import AddEventModal from '@/components/common/AddEventModal';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
 import supabase from "@/lib/supabaseClient";
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-// Mock events data - replace with real data later
+/**
+ * Mock events data for development and testing
+ * @type {Event[]}
+ */
 const mockEvents: Event[] = [
     {
         id: 1,
@@ -33,10 +56,15 @@ const mockEvents: Event[] = [
 ];
 
 export default function Dashboard() {
+    const router = useRouter();
     const { coords, error } = useUserLocation();
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
     const [events, setEvents] = useState(mockEvents);
 
+    /**
+     * Handles clicking on a map marker
+     * @param {number} eventId - The ID of the clicked event
+     */
     const handleMarkerClick = (eventId: number) => {
         const event = events.find(e => e.id === eventId);
         if (event) {
@@ -44,8 +72,11 @@ export default function Dashboard() {
         }
     };
 
+    /**
+     * Handles the creation of a new event
+     * @param {any} newEvent - The event data from the form
+     */
     const handleAddEvent = (newEvent: any) => {
-        // Convert the form data to match the Event type
         const event: Event = {
             id: events.length + 1,
             title: newEvent.title,
@@ -53,10 +84,18 @@ export default function Dashboard() {
             time: new Date(newEvent.time).toLocaleString(),
             attendees: 0,
             status: 'available',
-            coords: [-71.1097, 42.3505], // Default coordinates, should be updated with actual location
+            coords: [-71.1097, 42.3505], // Default coordinates, to be updated
         };
 
         setEvents([...events, event]);
+    };
+
+    /**
+     * Handles navigation to the landing page
+     * Routes the user back to the main application page (/)
+     */
+    const handleHomeClick = () => {
+        router.push('/');
     };
 
     return (
@@ -64,40 +103,31 @@ export default function Dashboard() {
             <NavBar />
             
             <div className="flex flex-1">
-                {/* Sidebar */}
+                {/* Sidebar Navigation - Simplified version with essential functions */}
                 <div className="w-64 bg-zinc-800 p-6 flex flex-col">
                     <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-zinc-400 text-sm mb-8">Find free food events across campus</p>
                     
                     <nav className="space-y-4">
-                        <a href="#" className="flex items-center text-white hover:text-green-400">
-                            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
+                        {/* Home Button - Routes to landing page */}
+                        <button 
+                            onClick={handleHomeClick}
+                            className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left"
+                        >
+                            <HomeIcon className="w-5 h-5 mr-3" />
                             Home
-                        </a>
-                        <a href="#" className="flex items-center text-white hover:text-green-400">
-                            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Nearby Events
-                        </a>
-                        <a href="#" className="flex items-center text-white hover:text-green-400">
-                            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Upcoming Events
-                        </a>
-                        <a href="#" className="flex items-center text-white hover:text-green-400">
-                            <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
+                        </button>
+
+                        {/* Favorites Button - Core feature retained */}
+                        <button className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left">
+                            <HeartIcon className="w-5 h-5 mr-3" />
                             Favorites
-                        </a>
+                        </button>
+
+                        {/* Add Event Button - Essential functionality */}
                         <button
                             onClick={() => setIsAddEventModalOpen(true)}
-                            className="flex items-center text-white hover:text-green-400 mt-8"
+                            className="flex items-center text-white hover:text-green-400 mt-8 transition-colors w-full text-left"
                         >
                             <PlusIcon className="w-5 h-5 mr-3" />
                             Add Event
