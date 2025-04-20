@@ -1,21 +1,69 @@
 "use client";
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Map from '@/components/map/Map';
 import LocationPrompt from '@/components/common/LocationPrompt';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { Event } from '@/types/map';
-import { createBrowserClient } from '@supabase/ssr' //helps with mamaging user session
+import { useRouter } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
 
-export const supabase = createBrowserClient(
+/**
+ * Initialize Supabase client for authentication and database operations
+ * Uses environment variables for secure configuration
+ */
+const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+);
 
+/**
+ * Team member information for the About section
+ * Each member has:
+ * - name: Full name of the team member
+ * - role: Their role in the project
+ * - bio: Brief description of their background and interests
+ * - imageUrl: Path to their profile image (currently using placeholders)
+ */
+const teamMembers = [
+    {
+        name: "Ryan Rodriguez",
+        role: "Full Stack Developer",
+        bio: "Rising Senior at Boston University studying Computer Science, passionate about creating impactful solutions.",
+        imageUrl: "/placeholder-1.jpg" // Add actual image paths
+    },
+    {
+        name: "Ben Bucaj",
+        role: "Full Stack Developer",
+        bio: "Rising Senior at Boston University studying Computer Science, focused on building efficient and scalable applications.",
+        imageUrl: "/placeholder-2.jpg"
+    },
+    {
+        name: "Jason Anghad",
+        role: "Full Stack Developer",
+        bio: "Senior at Boston University studying Computer Science, dedicated to developing innovative software solutions.",
+        imageUrl: "/placeholder-3.jpg"
+    },
+    {
+        name: "Nicole Lin",
+        role: "Full Stack Developer",
+        bio: "Rising Senior at Boston University studying Computer Science, enthusiastic about creating user-centric applications.",
+        imageUrl: "/placeholder-4.jpg"
+    }
+];
 
-
-// Mock events data - replace with real data later
+/**
+ * Mock events data for the map visualization
+ * Each event includes:
+ * - id: Unique identifier
+ * - title: Event name
+ * - location: Building name
+ * - time: Event time
+ * - attendees: Number of attendees
+ * - status: Current status (available/starting_soon)
+ * - coords: [longitude, latitude] coordinates
+ */
 const mockEvents: Event[] = [
     {
         id: 1,
@@ -37,17 +85,46 @@ const mockEvents: Event[] = [
     }
 ];
 
+/**
+ * LandingPage Component
+ * Main landing page of the Spark!Bytes application
+ * Features:
+ * - Interactive map background
+ * - Hero section with CTA buttons
+ * - How It Works section
+ * - Features section
+ * - About section with team member cards
+ */
 export default function LandingPage() {
-    const router = useRouter();
     const { coords, error, loading } = useUserLocation();
+    const router = useRouter();
 
-    const handleGetStarted = () => {
-        router.push('/login');
-    };
-
+    /**
+     * Handles marker click events on the map
+     * @param eventId - ID of the clicked event
+     */
     const handleMarkerClick = (eventId: number) => {
         console.log(`Clicked event: ${eventId}`);
-        // Add your event click handling logic here
+    };
+
+    /**
+     * Navigates to the login page when Get Started button is clicked
+     */
+    const handleGetStarted = () => {
+        window.location.href = '/login';
+    };
+
+    /**
+     * Handles smooth scrolling to the About section
+     * Prevents default anchor behavior and uses scrollIntoView
+     * @param e - Mouse event from the Learn More button click
+     */
+    const handleLearnMore = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault();
+        const aboutSection = document.getElementById('about-section');
+        if (aboutSection) {
+            aboutSection.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     return (
@@ -71,19 +148,29 @@ export default function LandingPage() {
                     <p className="text-xl md:text-2xl mb-8 text-zinc-200">
                         Discover and claim surplus food from events around BU campus
                     </p>
-                    <button 
-                        onClick={handleGetStarted}
-                        className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
-                    >
-                        Get Started
-                    </button>
+                    {/* Centered CTA Buttons */}
+                    <div className="flex justify-center space-x-4">
+                        <button 
+                            onClick={handleGetStarted}
+                            className="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+                        >
+                            Get Started
+                        </button>
+                        <a 
+                            href="#about-section"
+                            onClick={handleLearnMore}
+                            className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+                        >
+                            Learn More
+                        </a>
+                    </div>
                 </div>
             </section>
 
             {/* Location Prompt */}
             <LocationPrompt loading={loading} error={error} />
 
-            {/* Additional Landing Page Sections */}
+            {/* How It Works Section */}
             <section className="py-20 px-4 bg-zinc-800">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
@@ -165,6 +252,42 @@ export default function LandingPage() {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* About Section */}
+            <section id="about-section" className="py-20 bg-neutral-900 text-gray-100">
+                <div className="max-w-7xl mx-auto px-4">
+                    <h2 className="text-3xl font-bold text-center mb-8">About Spark!Bytes</h2>
+                    <div className="flex flex-wrap justify-center gap-8">
+                        {teamMembers.map((member, index) => (
+                            <div 
+                                key={index} 
+                                className="w-64 flex-shrink-0 bg-neutral-800 rounded-xl p-6 shadow-lg transform hover:scale-105 transition-transform duration-200"
+                            >
+                                {/* Profile Image */}
+                                <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-neutral-700 overflow-hidden">
+                                    <img 
+                                        src={member.imageUrl} 
+                                        alt={member.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                
+                                {/* Member Info */}
+                                <div className="text-center">
+                                    <h3 className="text-xl font-semibold mb-1">{member.name}</h3>
+                                    <p className="text-green-400 mb-3">{member.role}</p>
+                                    <p className="text-gray-400 text-sm mb-4">{member.bio}</p>
+                                    
+                                    {/* University Tag */}
+                                    <span className="inline-block bg-neutral-700 text-xs text-gray-300 px-3 py-1 rounded-full">
+                                        Boston University
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>

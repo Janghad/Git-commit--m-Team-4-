@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/**
+ * Enable smooth scrolling behavior across the entire application
+ * This provides a better user experience when navigating between sections
+ */
+html {
+    scroll-behavior: smooth;
+}
+
+/**
+ * Map container styling
+ * Ensures the map takes up the full height and width of its container
+ * with a light grey background and rounded corners
+ */
 #map-container {
     height: 100%;
     width: 100%;
@@ -9,6 +22,10 @@
     border-radius: 20px;
 }
 
+/**
+ * Mapbox popup styling
+ * Customizes the appearance of location markers and their popups
+ */
 .mapboxgl-popup {
   max-width: 200px;
 }
