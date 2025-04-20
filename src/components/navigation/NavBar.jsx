@@ -8,11 +8,20 @@ import { useRouter } from "next/navigation";
 import supabase from "@/lib/supabaseClient";
 
 /**
- * navbar component
- *
- * this component shows a horizontal nav bar at the top with the user's name
- * and a settings button that opens a dropdown.
- * the dropdown has options like going to the dietary preferences page.
+ * NavBar Component
+ * 
+ * This component shows a horizontal navigation bar at the top of the dashboard with:
+ * - User profile section (left): Displays user initials in a green circle and full name
+ * - Spark!Bytes logo (center): Displayed in green to match the application's theme
+ * - Settings button (right): Opens a dropdown menu with user options
+ * 
+ * Styling Notes:
+ * - Uses a zinc-900 background with a subtle zinc-800 bottom border for visual separation
+ * - User initials circle uses green-400 to match the application's accent color
+ * - Spark!Bytes logo is permanently styled in green-400 for brand consistency
+ * - Settings button uses zinc-800 background with zinc-700 hover state
+ * 
+ * @component
  */
 const NavBar = () => {
   // get the router to handle navigation between pages
@@ -90,23 +99,22 @@ const NavBar = () => {
   ];
 
   return (
-    // the nav element is our container for the navigation bar
-    // we style it with tailwind classes: full width, background color, padding, flex display, etc.
-    <nav className="w-full bg-zinc-900 text-white px-6 py-3 flex items-center justify-between shadow-md relative">
-      {/* User Profile Circle */}
+    // Navigation bar container with consistent dark theme styling
+    <nav className="w-full bg-zinc-900 text-white px-6 py-3 flex items-center justify-between relative border-b border-zinc-800">
+      {/* User Profile Circle - Using green-400 to match application's accent color */}
       <div className="flex items-center">
-        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-sm font-medium">
+        <div className="w-8 h-8 rounded-full bg-green-400 flex items-center justify-center text-sm font-medium">
           {userInitials}
         </div>
         <span className="ml-3 font-semibold">{userName}</span>
       </div>
 
-      {/* SparkBytes Logo */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold">
-        SparkBytes
+      {/* Spark!Bytes Logo - Centered with permanent green-400 color for brand consistency */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-green-400">
+        Spark!Bytes
       </div>
 
-      {/* Settings */}
+      {/* Settings dropdown container */}
       <div className="relative">
         <button
           onClick={toggleSettings}
