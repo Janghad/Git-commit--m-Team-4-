@@ -37,56 +37,115 @@ const Login = () => {
   const [password, setPassword] = useState("")
   const [userType, setUserType] = useState("student") // default selection
 
-  //Handles Google authentication for login
-  const handleGoogleLogin = async () => {
-    const {error} = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: "http://localhost:3000/api/auth/callback", // specify the callback URL
-      }, 
-    })
-    if (error) console.error("Error with Google authentication", error.message)
-  }
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
-  //Checks if the user is already in the DB
+
+  
+  //If the user is already loggin in, redirect to the dashboard
   useEffect (() => {
-    const checkUserExists = async () => {
-      const {data: {user}} = await supabase.auth.getUser()
-      if (!user) return 
-
-      const {data: existing} = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("email", user.email)
-        .maybeSingle() //refernced ChatGPT to test user's existence
-
-      if (existing) {
+    const checkSession = async () => {
+      const {data: {session}} = await supabase.auth.getSession()    //built in session tracker from supabase
+      if (session) {
         router.push("/dashboard")
-      } else {
-        // Debug: log what's happening
-        console.log("No existing user found:", user.email)
-        router.push("/signup")
       }
     }
 
-    checkUserExists()
+
+    checkSession()
   }, [router])
-  /**
-   * Handles form submission for login
-   * Validates the form and redirects based on user type
-   * 
-   * @param {React.FormEvent} e - The form submission event
-   */
-  const handleSubmit = (e) => {
-    // when the form gets submitted we stop it from refreshing the page
-    // then we just check if the user is a student or not and send them to the right place
 
-    e.preventDefault() // stop the page from refreshing
 
-    // check what kind of user they are and redirect them
-    if (userType === "student") router.push("/dietary-preferences")
-    else router.push("/dashboard")
+  const handleEmailLogin = async (e) => {
+    e.preventDefault()
+    setFormSubmitted(true)  //Tracks the form as submitted
+
+    if (!email || !password) {
+      setError("Please fill in both email and password") 
+      return
+    }
+
+    //Used built in endsWith feature to check if the last characters entered ends in @bu.edu
+    if (!email.endsWith("bu.edu")) {    
+      setError("Please use your BU email address (@bu.edu)")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+    try {
+      //Supabase authentication
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
+
+      if (signInError) {
+        throw new Error(signInError.message)
+      }
+
+      //Checks if the user exisits in the custom profiles table
+      if(data?.user) {
+        const {data:profile, error:profileError} = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("auth_id", data.user.id) //refernced ChatGPT to test user's existence
+          .single()
+
+      //PGRST116 is an error code from PostgREST used by Supabase that essentially means no results found
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error("Error fetching profile:", profileError)
+      }
+
+
+      //for the case in which the user has an account but does not have other necessary data stores 
+      //this occurs when user signs up with google authenticate 
+      if (!profile) {
+        router.push("/dietary-preferences")
+      } else if (userType === "student") {
+        router.push("/dashboard")
+      } else {
+        router.push("/dashboard")
+      }
+    }
+      } catch (error) {
+        console.error("Login failed:", error)
+        setError(error.message || "Login failed. Please check your credentials.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    const handleGoogleLogin = async () => {
+    // Set loading state to disable buttons and show loading indicators
+    setLoading(true)
+    setError("")
+
+    try {
+      // Triggers Google OAuth flow with Supabase
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          // Dynamic redirect based on the current environment
+          redirectTo: `${window.location.origin}/api/auth/callback`,
+        },
+      })
+
+      // Handle potential OAuth setup errors
+      if (error) {
+        throw new Error(error.message)
+      }
+      
+      // The auth callback handler will manage the session and redirect afterwards
+    } catch (error) {
+      console.error("Google login failed:", error)
+      setError(error.message || "Google login failed. Please try again.")
+    } finally {
+      setLoading(false)
+    }
   }
+
 
   return (
     // this is the outer container that centers everything and makes it look nice on all screen sizes
@@ -103,10 +162,18 @@ const Login = () => {
           <p className="mt-2 text-sm text-zinc-400">Enter your credentials to access your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {/*Error Display Message*/}
+        {/*Error appears when authentication fails*/}
+        {error && (
+          <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+        )}
+
+        <form onSubmit={handleEmailLogin} className="mt-8 space-y-6">
           <div className="space-y-4">
             {/* Email Input */}
-            {/* here’s the email field. it shows the label, the input box, and tracks what the user types */}
+            {/* here's the email field. it shows the label, the input box, and tracks what the user types */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-zinc-300">
                 Email
@@ -118,12 +185,22 @@ const Login = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className={`mt-1 block w-full px-3 py-2 bg-zinc-700 border ${
+                  formSubmitted && (!email || !email.endsWith("@bu.edu")) 
+                    ? "border-red-500" 
+                    : "border-zinc-600"
+                } rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent`}
               />
+              {formSubmitted && !email && (
+                <p className="mt-1 text-sm text-red-500">Email is required</p>
+              )}
+              {formSubmitted && email && !email.endsWith("@bu.edu") && (
+                <p className="mt-1 text-sm text-red-500">Please use your BU email address</p>
+              )}
             </div>
 
-            {/* Password Input */}
-            {/* same deal for password — we’re keeping track of it in state too */}
+            {/* Password Input with Validation */}
+            {/* same deal for password — we're keeping track of it in state too */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-zinc-300">
                 Password
@@ -134,12 +211,17 @@ const Login = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className={`mt-1 block w-full px-3 py-2 bg-zinc-700 border ${
+                  formSubmitted && !password ? "border-red-500" : "border-zinc-600"
+                } rounded-lg text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent`}
               />
+              {formSubmitted && !password && (
+                <p className="mt-1 text-sm text-red-500">Password is required</p>
+              )}
             </div>
 
             {/* Role Selection */}
-            {/* okay this is where they pick if they’re a student or faculty */}
+            {/* okay this is where they pick if they're a student or faculty */}
             {/* we default it to student at the top but they can change it here */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-zinc-300">
@@ -169,25 +251,27 @@ const Login = () => {
               </div>
             </div>
           </div>
+
           {/* this button sends the form — it triggers handleSubmit up above */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-zinc-800 transition-colors duration-200"
           >
-            Sign In
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          {/*Google Authentication Button*/}
+          {/* Google Authentication Button */}
           <button
             type="button"
             onClick={handleGoogleLogin}
+            disabled={loading}
             className="w-full mt-4 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600"
           >
-            Continue with Google
+            {loading ? 'Connecting...' : 'Continue with Google'}
           </button>
 
-
-          {/* little message at the bottom in case someone doesn’t have an account yet */}
+          {/* little message at the bottom in case someone doesn't have an account yet */}
           <p className="text-center text-sm text-zinc-400">
             Don't have an account?{" "}
             <a href="/signup" className="font-medium text-green-500 hover:text-green-400">
@@ -199,5 +283,6 @@ const Login = () => {
     </div>
   )
 }
+
 
 export default Login
