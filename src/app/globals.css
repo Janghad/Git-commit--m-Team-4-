@@ -3,6 +3,99 @@
 @tailwind utilities;
 
 /**
+ * Global CSS Variables and Theme Configuration
+ * Updated to support dark mode and consistent styling across components
+ */
+:root {
+    /* Base colors for light mode */
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+    /* Primary brand colors */
+    --primary-green: #22c55e;
+    --primary-green-hover: #16a34a;
+}
+
+/* Dark mode color scheme */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --foreground-rgb: 255, 255, 255;
+        --background-start-rgb: 0, 0, 0;
+        --background-end-rgb: 0, 0, 0;
+    }
+}
+
+/* Base styles for the entire application */
+body {
+    color: rgb(var(--foreground-rgb));
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgb(var(--background-end-rgb))
+    ) rgb(var(--background-start-rgb));
+}
+
+/**
+ * Form Input Styling
+ * Updated to ensure consistent appearance and better visibility in both light and dark modes
+ */
+.form-input {
+    @apply w-full px-3 py-2 border rounded-md;
+    @apply text-gray-900 dark:text-white;
+    @apply bg-white dark:bg-gray-800;
+    @apply border-gray-300 dark:border-gray-600;
+    @apply focus:ring-2 focus:ring-green-500 focus:border-transparent;
+}
+
+/**
+ * Button Styling
+ * Updated primary button styles to match brand colors and provide clear interaction states
+ */
+.btn-primary {
+    @apply px-4 py-2 rounded-md;
+    @apply bg-green-600 hover:bg-green-500;
+    @apply text-white font-semibold;
+    @apply transition-colors duration-200;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/**
+ * Modal Styling
+ * Enhanced visibility and interaction states for modal components
+ */
+.modal-content {
+    @apply bg-white dark:bg-gray-800;
+    @apply text-gray-900 dark:text-white;
+    @apply rounded-lg shadow-xl;
+    @apply p-6;
+}
+
+@layer base {
+  /* force every input/textarea/select to use your white text color */
+  input,
+  textarea,
+  select {
+    @apply text-zinc-100 bg-zinc-800 placeholder-white;
+  }
+
+  /* for native date/time pickers, strip inner styling & force white text */
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    appearance: none;
+  }
+  input::-webkit-datetime-edit-text,
+  input::-webkit-datetime-edit-month-field,
+  input::-webkit-datetime-edit-day-field,
+  input::-webkit-datetime-edit-year-field,
+  input::-webkit-datetime-edit-hour-field,
+  input::-webkit-datetime-edit-minute-field,
+  input::-webkit-datetime-edit-ampm-field {
+    color: #f4f4f5 !important;
+  }
+}
+
+/**
  * Enable smooth scrolling behavior across the entire application
  * This provides a better user experience when navigating between sections
  */

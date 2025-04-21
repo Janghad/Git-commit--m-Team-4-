@@ -29,29 +29,75 @@ import { HomeIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
 import supabase from "@/lib/supabaseClient";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { EventFormData } from '@/types/event';
+
+/**
+ * Extended Event type to include additional fields required for the dashboard
+ * @interface DashboardEvent
+ * @extends {Event}
+ */
+interface DashboardEvent extends Event {
+    /** Optional description of the event */
+    description?: string;
+    /** Array of food items being offered with their dietary tags */
+    foodOfferings: Array<{
+        name: string;
+        dietaryTags: Array<{ id: string; name: string }>;
+    }>;
+    /** Name of the event organizer */
+    organizerName: string;
+    /** Email of the event organizer */
+    organizerEmail: string;
+    /** Optional phone number of the event organizer */
+    organizerPhone?: string;
+    /** Optional maximum number of attendees allowed */
+    maxAttendees?: number;
+    /** Whether the event is public or private */
+    isPublic: boolean;
+}
 
 /**
  * Mock events data for development and testing
- * @type {Event[]}
+ * Includes sample events with all required fields from DashboardEvent interface
  */
-const mockEvents: Event[] = [
+const mockEvents: DashboardEvent[] = [
     {
         id: 1,
         title: "Computer Science Seminar",
-        location: "CAS Building, Room 201",
-        time: "Today, 12:30 PM - 2:00 PM",
-        attendees: 24,
+        location: "CAS Building",
+        time: "2:00 PM - 4:00 PM",
+        attendees: 30,
         status: "available",
-        coords: [-71.1097, 42.3505]
+        coords: [-71.1097, 42.3505],
+        description: "Leftover food from CS seminar",
+        foodOfferings: [
+            {
+                name: "Pizza",
+                dietaryTags: []
+            }
+        ],
+        organizerName: "John Doe",
+        organizerEmail: "john@example.com",
+        isPublic: true
     },
     {
         id: 2,
-        title: "Engineering Mixer",
-        location: "Engineering Building, Lobby",
-        time: "Today, 4:00 PM - 6:00 PM",
-        attendees: 42,
+        title: "Engineering Workshop",
+        location: "Photonics Center",
+        time: "3:30 PM - 5:30 PM",
+        attendees: 25,
         status: "starting_soon",
-        coords: [-71.1080, 42.3490]
+        coords: [-71.1080, 42.3490],
+        description: "Surplus food from engineering workshop",
+        foodOfferings: [
+            {
+                name: "Sandwiches",
+                dietaryTags: []
+            }
+        ],
+        organizerName: "Jane Smith",
+        organizerEmail: "jane@example.com",
+        isPublic: true
     }
 ];
 
@@ -59,7 +105,7 @@ export default function Dashboard() {
     const router = useRouter();
     const { coords, error } = useUserLocation();
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
-    const [events, setEvents] = useState(mockEvents);
+    const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
 
     /**
      * Handles clicking on a map marker
@@ -74,20 +120,43 @@ export default function Dashboard() {
 
     /**
      * Handles the creation of a new event
-     * @param {any} newEvent - The event data from the form
+     * Creates a new event object from form data and updates the events list
+     * 
+     * @param {EventFormData} eventData - The validated form data for the new event
+     * @returns {Promise<DashboardEvent>} The newly created event object
+     * @throws {Error} If event creation fails
      */
-    const handleAddEvent = (newEvent: any) => {
-        const event: Event = {
-            id: events.length + 1,
-            title: newEvent.title,
-            location: newEvent.location,
-            time: new Date(newEvent.time).toLocaleString(),
-            attendees: 0,
-            status: 'available',
-            coords: [-71.1097, 42.3505], // Default coordinates, to be updated
-        };
+    const handleAddEvent = async (eventData: EventFormData) => {
+        try {
+            // Simulate API call with timeout
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-        setEvents([...events, event]);
+            // Create new event object with form data
+            const newEvent: DashboardEvent = {
+                id: events.length + 1,
+                title: eventData.title,
+                location: eventData.location.name,
+                time: `${eventData.startDateTime.toLocaleTimeString()} - ${eventData.endDateTime.toLocaleTimeString()}`,
+                attendees: 0,
+                status: 'available',
+                coords: eventData.location.coordinates,
+                description: eventData.description || '',
+                foodOfferings: eventData.foodOfferings,
+                organizerName: eventData.organizerName,
+                organizerEmail: eventData.organizerEmail,
+                organizerPhone: eventData.organizerPhone,
+                maxAttendees: eventData.maxAttendees,
+                isPublic: eventData.isPublic,
+            };
+
+            // Update events list with new event
+            setEvents(prevEvents => [...prevEvents, newEvent]);
+            
+            return newEvent;
+        } catch (error) {
+            console.error('Error creating event:', error);
+            throw new Error('Failed to create event. Please try again.');
+        }
     };
 
     /**
