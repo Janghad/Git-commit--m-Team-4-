@@ -17,9 +17,10 @@
  * ```
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { supabase } from '../../lib/supabase';
 
 /**
  * Props for the SettingsModal component
@@ -40,6 +41,35 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose, userData, onSignOut }: SettingsModalProps) {
+    const [userRole, setUserRole] = useState<string>("Loading...");
+
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data, error } = await supabase
+                        .from("profiles")
+                        .select("role")
+                        .eq("auth_id", user.id)
+                        .single();
+
+                    if (data && !error) {
+                        // Capitalize first letter of role
+                        setUserRole(data.role.charAt(0).toUpperCase() + data.role.slice(1));
+                    } else {
+                        setUserRole("Not specified");
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching user role:", error);
+                setUserRole("Error loading");
+            }
+        };
+
+        fetchUserRole();
+    }, []);
+
     /**
      * Handles the sign out process
      * Closes the modal and calls the provided onSignOut callback
@@ -99,6 +129,16 @@ export default function SettingsModal({ isOpen, onClose, userData, onSignOut }: 
                             </label>
                             <div className="w-full px-4 py-2 rounded-lg bg-zinc-700 text-white border border-zinc-600">
                                 {userData.email}
+                            </div>
+                        </div>
+
+                        {/* Account Type */}
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-300 mb-2">
+                                Account Type
+                            </label>
+                            <div className="w-full px-4 py-2 rounded-lg bg-zinc-700 text-white border border-zinc-600">
+                                {userRole}
                             </div>
                         </div>
 
