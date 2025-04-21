@@ -22,39 +22,16 @@
 import React, { useState, useEffect } from 'react';
 import Map from '@/components/map/Map';
 import { useUserLocation } from '@/hooks/useUserLocation';
-import { Event } from '@/types/map';
+import { DashboardEvent, EventFormData } from '@/types/event';
 import NavBar from '@/components/navigation/NavBar';
 import AddEventModal from '@/components/common/AddEventModal';
 import { HomeIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
 import supabase from "@/lib/supabaseClient";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { EventFormData } from '@/types/event';
-
-/**
- * Extended Event type to include additional fields required for the dashboard
- * @interface DashboardEvent
- * @extends {Event}
- */
-interface DashboardEvent extends Event {
-    /** Optional description of the event */
-    description?: string;
-    /** Array of food items being offered with their dietary tags */
-    foodOfferings: Array<{
-        name: string;
-        dietaryTags: Array<{ id: string; name: string }>;
-    }>;
-    /** Name of the event organizer */
-    organizerName: string;
-    /** Email of the event organizer */
-    organizerEmail: string;
-    /** Optional phone number of the event organizer */
-    organizerPhone?: string;
-    /** Optional maximum number of attendees allowed */
-    maxAttendees?: number;
-    /** Whether the event is public or private */
-    isPublic: boolean;
-}
+import EventDetailsModal from '@/components/common/EventDetailsModal';
+import FavoritesModal from '@/components/common/FavoritesModal';
+import { DIETARY_TAGS } from '@/constants/eventData';
 
 /**
  * Mock events data for development and testing
@@ -73,7 +50,11 @@ const mockEvents: DashboardEvent[] = [
         foodOfferings: [
             {
                 name: "Pizza",
-                dietaryTags: []
+                dietaryTags: [DIETARY_TAGS[0], DIETARY_TAGS[1]], // Using actual DietaryTag objects
+                description: "Assorted pizzas",
+                quantity: "10 boxes",
+                servingSize: "1 slice",
+                temperature: "room temperature"
             }
         ],
         organizerName: "John Doe",
@@ -92,7 +73,11 @@ const mockEvents: DashboardEvent[] = [
         foodOfferings: [
             {
                 name: "Sandwiches",
-                dietaryTags: []
+                dietaryTags: [DIETARY_TAGS[2]], // Using actual DietaryTag object
+                description: "Assorted sandwiches",
+                quantity: "30 pieces",
+                servingSize: "1 sandwich",
+                temperature: "cold"
             }
         ],
         organizerName: "Jane Smith",
@@ -105,17 +90,47 @@ export default function Dashboard() {
     const router = useRouter();
     const { coords, error } = useUserLocation();
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
+    const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
+    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
     const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
+    const [favoriteEvents, setFavoriteEvents] = useState<DashboardEvent[]>([]);
 
     /**
      * Handles clicking on a map marker
+     * Opens the event details modal for the selected event
      * @param {number} eventId - The ID of the clicked event
      */
     const handleMarkerClick = (eventId: number) => {
         const event = events.find(e => e.id === eventId);
         if (event) {
-            console.log('Viewing details for:', event.title);
+            setSelectedEvent(event);
+            setIsEventDetailsModalOpen(true);
         }
+    };
+
+    /**
+     * Handles toggling an event's favorite status
+     * @param {DashboardEvent} event - The event to toggle
+     */
+    const handleToggleFavorite = (event: DashboardEvent) => {
+        setFavoriteEvents(prev => {
+            const isCurrentlyFavorited = prev.some(e => e.id === event.id);
+            if (isCurrentlyFavorited) {
+                return prev.filter(e => e.id !== event.id);
+            } else {
+                return [...prev, event];
+            }
+        });
+    };
+
+    /**
+     * Checks if an event is favorited
+     * @param {DashboardEvent} event - The event to check
+     * @returns {boolean} True if the event is favorited
+     */
+    const isEventFavorited = (event: DashboardEvent): boolean => {
+        return favoriteEvents.some(e => e.id === event.id);
     };
 
     /**
@@ -172,13 +187,12 @@ export default function Dashboard() {
             <NavBar />
             
             <div className="flex flex-1">
-                {/* Sidebar Navigation - Simplified version with essential functions */}
+                {/* Sidebar Navigation */}
                 <div className="w-64 bg-zinc-800 p-6 flex flex-col">
                     <h1 className="text-2xl font-bold text-white mb-2">Dashboard</h1>
                     <p className="text-zinc-400 text-sm mb-8">Find free food events across campus</p>
                     
                     <nav className="space-y-4">
-                        {/* Home Button - Routes to landing page */}
                         <button 
                             onClick={handleHomeClick}
                             className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left"
@@ -187,13 +201,14 @@ export default function Dashboard() {
                             Home
                         </button>
 
-                        {/* Favorites Button - Core feature retained */}
-                        <button className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left">
+                        <button 
+                            onClick={() => setIsFavoritesModalOpen(true)}
+                            className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left"
+                        >
                             <HeartIcon className="w-5 h-5 mr-3" />
-                            Favorites
+                            My Favorites
                         </button>
 
-                        {/* Add Event Button - Essential functionality */}
                         <button
                             onClick={() => setIsAddEventModalOpen(true)}
                             className="flex items-center text-white hover:text-green-400 mt-8 transition-colors w-full text-left"
@@ -255,7 +270,13 @@ export default function Dashboard() {
                                             {event.attendees} attending
                                         </div>
                                     </div>
-                                    <button className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedEvent(event);
+                                            setIsEventDetailsModalOpen(true);
+                                        }}
+                                        className="mt-4 w-full bg-zinc-600 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+                                    >
                                         View Details
                                     </button>
                                 </div>
@@ -270,6 +291,32 @@ export default function Dashboard() {
                 isOpen={isAddEventModalOpen}
                 onClose={() => setIsAddEventModalOpen(false)}
                 onSubmit={handleAddEvent}
+            />
+
+            {/* Event Details Modal */}
+            {selectedEvent && (
+                <EventDetailsModal
+                    isOpen={isEventDetailsModalOpen}
+                    onClose={() => {
+                        setIsEventDetailsModalOpen(false);
+                        setSelectedEvent(null);
+                    }}
+                    event={selectedEvent}
+                    isFavorited={isEventFavorited(selectedEvent)}
+                    onToggleFavorite={handleToggleFavorite}
+                />
+            )}
+
+            {/* Favorites Modal */}
+            <FavoritesModal
+                isOpen={isFavoritesModalOpen}
+                onClose={() => setIsFavoritesModalOpen(false)}
+                favoriteEvents={favoriteEvents}
+                onViewDetails={(event) => {
+                    setSelectedEvent(event);
+                    setIsFavoritesModalOpen(false);
+                    setIsEventDetailsModalOpen(true);
+                }}
             />
         </div>
     );
