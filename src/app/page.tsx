@@ -171,7 +171,7 @@ export default function LandingPage() {
             <LocationPrompt loading={loading} error={error} />
 
             {/* How It Works Section */}
-            <section className="py-20 px-4 bg-zinc-800">
+            <section className="py-20 px-4 bg-zinc-900">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
                         How It Works
@@ -200,7 +200,7 @@ export default function LandingPage() {
             <section className="py-20 px-4 bg-zinc-900">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">
-                        Why Use SparkBytes?
+                        Why Use Spark!Bytes?
                     </h2>
                     <div className="grid md:grid-cols-2 gap-12">
                         <div className="space-y-6">
@@ -251,6 +251,33 @@ export default function LandingPage() {
                                     <p className="text-zinc-400">Simple process from finding to claiming food events.</p>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Faculty Contact Section */}
+            <section className="py-20 px-4 bg-zinc-900">
+                <div className="max-w-6xl mx-auto">
+                    <div className="bg-zinc-700/50 p-8 md:p-12 rounded-2xl text-center backdrop-blur-sm">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                            Faculty Access
+                        </h2>
+                        <div className="space-y-4">
+                            <p className="text-xl text-zinc-200">
+                                Are you a faculty member interested in posting events?
+                            </p>
+                            <p className="text-xl">
+                                Please contact{' '}
+                                <a 
+                                    href="mailto:sparkbytes@gmail.com"
+                                    className="text-green-400 hover:text-green-300 transition-colors duration-200 font-semibold"
+                                    aria-label="Email sparkbytes@gmail.com for faculty access"
+                                >
+                                    sparkbytes@gmail.com
+                                </a>
+                                {' '}to request a faculty access code.
+                            </p>
                         </div>
                     </div>
                 </div>
