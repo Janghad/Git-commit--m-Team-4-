@@ -270,11 +270,11 @@ export default function LandingPage() {
                             <p className="text-xl">
                                 Please contact{' '}
                                 <a 
-                                    href="mailto:sparkbytes@gmail.com"
+                                    href="mailto:sparkbytesbu@gmail.com"
                                     className="text-green-400 hover:text-green-300 transition-colors duration-200 font-semibold"
                                     aria-label="Email sparkbytes@gmail.com for faculty access"
                                 >
-                                    sparkbytes@gmail.com
+                                    sparkbytesbu@gmail.com
                                 </a>
                                 {' '}to request a faculty access code.
                             </p>
@@ -284,7 +284,7 @@ export default function LandingPage() {
             </section>
 
             {/* About Section */}
-            <section id="about-section" className="py-20 bg-neutral-900 text-gray-100">
+            <section id="about-section" className="py-20 bg-zinc-900 text-gray-100">
                 <div className="max-w-7xl mx-auto px-4">
                     <h2 className="text-3xl font-bold text-center mb-8">About Spark!Bytes</h2>
                     <div className="flex flex-wrap justify-center gap-8">
