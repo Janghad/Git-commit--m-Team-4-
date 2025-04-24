@@ -108,7 +108,6 @@ const Signup = () => {
       email: user.email,
       full_name: `${firstName} ${lastName}`,  
       role: userType,
-      dietary_preferences: []
     };
     
     console.log("Inserting profile data:", profileData);

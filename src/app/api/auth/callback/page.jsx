@@ -58,7 +58,6 @@ export default function AuthCallback() {
           email: user.email,
           name: user.user_metadata?.full_name || user.email.split('@')[0] || '',  // Changed from full_name to name
           role: "student", // Default to student
-          dietary_preferences: []
         };
         
         // Try inserting with a direct SQL approach if the standard approach fails

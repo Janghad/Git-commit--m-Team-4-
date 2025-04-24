@@ -67,7 +67,7 @@ const Login = () => {
     }
 
     //Used built in endsWith feature to check if the last characters entered ends in @bu.edu
-    if (!email.endsWith("bu.edu")) {    
+    if (!email.endsWith("@bu.edu")) {    
       setError("Please use your BU email address (@bu.edu)")
       return
     }
@@ -80,6 +80,7 @@ const Login = () => {
         email,
         password
       })
+      console.log("Authentication response:", data, signInError);
 
       if (signInError) {
         throw new Error(signInError.message)
