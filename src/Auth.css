@@ -25,14 +25,12 @@
     font-size: 24px; /* bigger text */
     text-align: center; /* center text */
     font-weight: bold; /* bold title */
-    color: black; /* make title visible */
     margin-bottom: 5px; /* little space below */
   }
   
   /* subtitle / paragraph under title */
   .auth-description {
     font-size: 14px; /* small font */
-    color: black; /* changed from light gray to black */
     text-align: center; /* center it */
     margin-bottom: 20px; /* space under it */
   }
@@ -61,7 +59,6 @@
     display: block; /* makes label full width */
     margin-top: 15px; /* space above label */
     font-weight: bold; /* make it pop */
-    color: black; /* make sure it's visible */
   }
   
   /* input boxes for email, password, etc */
@@ -73,7 +70,6 @@
     margin-top: 8px; /* little space above box */
     border: 1px solid #ccc; /* gray border */
     border-radius: 5px; /* slight rounding */
-    color: black; /* make sure typed text is visible */
   }
   
   /* placeholder text inside inputs */
@@ -98,7 +94,6 @@
     display: flex; /* puts circle and text side by side */
     align-items: center; /* align vertically */
     margin-bottom: 5px; /* space between choices */
-    color: black; /* fix faded text */
   }
   
   /* all buttons (login, signup, etc) */
@@ -130,7 +125,6 @@
     text-align: center; /* center the text */
     margin-top: 15px; /* space above it */
     font-size: 14px; /* small text */
-    color: black; /* make it readable */
   }
   
   /* error message for invalid email */

@@ -1,9 +1,10 @@
 "use client" // enables client-side logic and hooks like useState
 import supabase from "../../lib/supabaseClient";
-
 import { useState } from "react" // allows us to save what the user types
 import { useRouter } from "next/navigation" // replaces useNavigate in next.js
 import "../../Auth.css" // custom styling for layout, inputs, buttons, etc
+import FacultyCodeModal from "@/components/common/FacultyCodeModal"
+import { toast } from 'react-hot-toast'
 
 /**
  * Signup Page Component
@@ -31,7 +32,7 @@ import "../../Auth.css" // custom styling for layout, inputs, buttons, etc
  */
 
 // this file is for the signup page where people can make a new account
-// we let them type in their info, check that it’s a bu email, and then sign them up
+// we let them type in their info, check that it's a bu email, and then sign them up
 const Signup = () => {
   console.log(supabase) //In order to test endpoint
   const router = useRouter() // used for redirecting the user after signup
@@ -40,7 +41,8 @@ const Signup = () => {
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState("") // shows error if not @bu.edu
   const [userType, setUserType] = useState("student") // default radio button
-
+  const [isFacultyCodeModalOpen, setIsFacultyCodeModalOpen] = useState(false)
+  const [isFacultyVerified, setIsFacultyVerified] = useState(false)
 
   //Google Login Handler
   // this is what happens if someone tries to sign in with google instead of the normal form
@@ -58,6 +60,23 @@ const Signup = () => {
       alert("Google login failed"); // something went wrong, just tell them
     }
   };
+
+  const handleUserTypeChange = (type) => {
+    if (type === "faculty") {
+      setIsFacultyCodeModalOpen(true)
+    } else {
+      setUserType(type)
+      setIsFacultyVerified(false)
+    }
+  }
+
+  const handleFacultyCodeSuccess = () => {
+    setUserType("faculty")
+    setIsFacultyVerified(true)
+    setIsFacultyCodeModalOpen(false)
+    toast.success("Faculty code verified. Please continue with sign-up.")
+  }
+
   /**
    * Handles form submission for signup
    * Validates the email domain and redirects based on user type
@@ -70,21 +89,27 @@ const Signup = () => {
     // check if email ends with @bu.edu
     if (!email.endsWith("@bu.edu")) {
       setEmailError("Email must end in @bu.edu")
-      return;
+      return
+    }
+
+    // If user type is faculty, check if they've been verified
+    if (userType === "faculty" && !isFacultyVerified) {
+      toast.error("Please verify your faculty status before continuing")
+      return
     }
 
     // if email is fine, clear any error
     setEmailError("")
 
     //Get values from form
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    const firstName = document.getElementById("firstName").value;
-    const lastName = document.getElementById("lastName").value;
+    const password = document.getElementById("password").value
+    const confirmPassword = document.getElementById("confirmPassword").value
+    const firstName = document.getElementById("firstName").value
+    const lastName = document.getElementById("lastName").value
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match. Please try again.")
-      return;
+      toast.error("Passwords do not match. Please try again.")
+      return
     }
 
     //Signing up with Google Authentication
@@ -92,38 +117,38 @@ const Signup = () => {
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
-    });
+    })
     
     if (error) {
-      console.error("Signup error. Please try again.", error.message);
-      alert("Signup failed: " + error.message);
-      return;
+      console.error("Signup error. Please try again.", error.message)
+      toast.error("Signup failed: " + error.message)
+      return
     }
     
-    const { user } = data;
-    console.log("Authenticated user:", user);
+    const { user } = data
+    console.log("Authenticated user:", user)
     
     const profileData = {
       auth_id: user.id,
       email: user.email,
       full_name: `${firstName} ${lastName}`,  
       role: userType,
-    };
-    
-    console.log("Inserting profile data:", profileData);
-    
-    const { error: insertError } = await supabase.from("profiles").insert([ profileData ]);
-    
-    if (insertError) {
-      console.error("Error inserting profile:", insertError.message);
-      alert("There was an error saving your profile data.");
-      return;
     }
     
-    console.log("Profile inserted successfully!");
+    console.log("Inserting profile data:", profileData)
     
+    const { error: insertError } = await supabase.from("profiles").insert([profileData])
+    
+    if (insertError) {
+      console.error("Error inserting profile:", insertError.message)
+      toast.error("There was an error saving your profile data.")
+      return
+    }
+    
+    console.log("Profile inserted successfully!")
+    toast.success("Account created successfully!")
     router.push("dashboard")
-  } 
+  }
 
   return (
     // page layout stuff
@@ -216,33 +241,50 @@ const Signup = () => {
             />
           </div>
 
-          {/* radio buttons for picking if they're a student or faculty */}
-          <div className="space-y-2">
+          {/* Updated Account Type Selection */}
+          <div className="space-y-4">
             <label className="block text-sm font-medium text-zinc-300">
               I am a:
             </label>
-            <div className="space-y-2">
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  value="student"
-                  checked={userType === "student"}
-                  onChange={() => setUserType("student")}
-                  className="h-4 w-4 text-green-500 border-zinc-600 bg-zinc-700 focus:ring-green-500 focus:ring-offset-zinc-800"
-                />
-                <span className="text-zinc-300">Student</span>
-              </label>
-              <label className="flex items-center space-x-3">
-                <input
-                  type="radio"
-                  value="faculty"
-                  checked={userType === "faculty"}
-                  onChange={() => setUserType("faculty")}
-                  className="h-4 w-4 text-green-500 border-zinc-600 bg-zinc-700 focus:ring-green-500 focus:ring-offset-zinc-800"
-                />
-                <span className="text-zinc-300">Faculty / Event Organizer</span>
-              </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("student")}
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                  userType === "student"
+                    ? "border-green-500 bg-green-500/10 text-green-500"
+                    : "border-zinc-600 bg-zinc-700/50 text-zinc-300 hover:border-zinc-500"
+                }`}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <span className="font-medium">Student</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUserTypeChange("faculty")}
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
+                  userType === "faculty"
+                    ? "border-green-500 bg-green-500/10 text-green-500"
+                    : "border-zinc-600 bg-zinc-700/50 text-zinc-300 hover:border-zinc-500"
+                }`}
+              >
+                <div className="flex flex-col items-center space-y-2">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <span className="font-medium">Faculty</span>
+                </div>
+              </button>
             </div>
+            {userType === "faculty" && !isFacultyVerified && (
+              <p className="text-sm text-amber-400 mt-2">
+                Please verify your faculty status to continue
+              </p>
+            )}
           </div>
 
           {/* this button triggers the signup form */}
@@ -256,7 +298,7 @@ const Signup = () => {
           {/*Temp button for google authenticate / google login instead*/}
           <button
             type="button"
-            onClick= {handleGoogleLogin}
+            onClick={handleGoogleLogin}
             className="w-full mt-4 flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-zinc-800 transition-colors duration-200"
           >
             Continue with Google
@@ -271,6 +313,13 @@ const Signup = () => {
           </p>
         </form>
       </div>
+
+      {/* Faculty Code Modal */}
+      <FacultyCodeModal
+        isOpen={isFacultyCodeModalOpen}
+        onClose={() => setIsFacultyCodeModalOpen(false)}
+        onSuccess={handleFacultyCodeSuccess}
+      />
     </div>
   )
 }
