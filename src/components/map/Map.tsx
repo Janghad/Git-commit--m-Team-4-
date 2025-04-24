@@ -89,16 +89,32 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
     const updateMapLighting = useCallback(() => {
         const newLightPreset = getLightPresetByTime();
         
-        if (newLightPreset !== currentLightPreset) {
+        if (newLightPreset !== currentLightPreset && mapRef.current) {
+            // Update the visual state
             setCurrentLightPreset(newLightPreset);
+            
+            // Actually update the map's lighting using Mapbox's configuration API
+            mapRef.current.setConfigProperty('basemap', 'lightPreset', newLightPreset);
+
+            // Optionally adjust ambient light intensity based on time of day
+            const lightIntensity = {
+                dawn: 0.5,
+                day: 1.0,
+                dusk: 0.3,
+                night: 0.1
+            }[newLightPreset];
+
+            mapRef.current.setLight({
+                intensity: lightIntensity,
+                anchor: "viewport"
+            });
         }
     }, [currentLightPreset, getLightPresetByTime]);
 
-    // Initialize map
+    // Initialize map with proper configuration
     useEffect(() => {
         if (!mapContainerRef.current) return;
 
-        // Initialize map with proper token and configuration
         mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
         
         mapRef.current = new mapboxgl.Map({
@@ -110,11 +126,32 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             antialias: true
         });
 
-        // Set initial light preset based on time
+        // Set initial light preset and configuration
         const initialLightPreset = getLightPresetByTime();
         setCurrentLightPreset(initialLightPreset);
 
-        // Handle map movement without triggering re-renders
+        // Wait for map to load before setting initial lighting
+        mapRef.current.on('load', () => {
+            mapRef.current?.setConfigProperty('basemap', 'lightPreset', initialLightPreset);
+            
+            // Set initial light intensity
+            const initialLightIntensity = {
+                dawn: 0.5,
+                day: 1.0,
+                dusk: 0.3,
+                night: 0.1
+            }[initialLightPreset];
+
+            mapRef.current?.setLight({
+                intensity: initialLightIntensity,
+                anchor: "viewport"
+            });
+        });
+
+        // Update lighting every minute
+        const lightingInterval = setInterval(updateMapLighting, 60000);
+
+        // Handle map movement
         mapRef.current.on("move", () => {
             if (mapRef.current) {
                 const mapCenter = mapRef.current.getCenter();
@@ -126,16 +163,13 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             }
         });
 
-        // Set up interval to update lighting based on time
-        const lightingInterval = setInterval(updateMapLighting, 60000);
-
         return () => {
             clearInterval(lightingInterval);
             if (mapRef.current) {
                 mapRef.current.remove();
             }
         };
-    }, []); // Empty dependency array for initialization only
+    }, [updateMapLighting, getLightPresetByTime]);
 
     // Handle markers and user position updates
     useEffect(() => {
