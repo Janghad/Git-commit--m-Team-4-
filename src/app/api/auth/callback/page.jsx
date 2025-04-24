@@ -98,15 +98,15 @@ export default function AuthCallback() {
         console.log("Profile created successfully");
         
         // For Google sign-ups, we'll send them to set dietary preferences
-        console.log("Router push to: /dietary-preferences");
+        console.log("Router push to: /dashboard");
         
         // Try direct window.location as fallback
         setTimeout(() => {
-          router.push("/dietary-preferences");
+          router.push("/dashboard");
           
           // Fallback if router doesn't work
           setTimeout(() => {
-            window.location.href = "/dietary-preferences";
+            window.location.href = "/dashboard";
           }, 1000);
         }, 100);
       }
