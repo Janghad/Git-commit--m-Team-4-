@@ -33,6 +33,7 @@ import EventDetailsModal from '@/components/common/EventDetailsModal';
 import FavoritesModal from '@/components/common/FavoritesModal';
 import FacultyCodeModal from '@/components/common/FacultyCodeModal';
 import { DIETARY_TAGS } from '@/constants/eventData';
+import toast from 'react-hot-toast';
 
 /**
  * Mock events data for development and testing
@@ -97,6 +98,26 @@ export default function Dashboard() {
     const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
     const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
     const [favoriteEvents, setFavoriteEvents] = useState<DashboardEvent[]>([]);
+    
+    // New state for tracking user RSVPs
+    const [userRsvps, setUserRsvps] = useState<Record<number, boolean>>({});
+    
+    // Load RSVPs from localStorage on component mount
+    useEffect(() => {
+        const savedRsvps = localStorage.getItem('userRsvps');
+        if (savedRsvps) {
+            try {
+                setUserRsvps(JSON.parse(savedRsvps));
+            } catch (error) {
+                console.error('Failed to parse saved RSVPs:', error);
+            }
+        }
+    }, []);
+    
+    // Save RSVPs to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('userRsvps', JSON.stringify(userRsvps));
+    }, [userRsvps]);
 
     /**
      * Handles clicking on a map marker
@@ -191,6 +212,101 @@ export default function Dashboard() {
     const handleFacultyCodeSuccess = () => {
         setIsFacultyCodeModalOpen(false);
         setIsAddEventModalOpen(true);
+    };
+
+    /**
+     * Checks if the current user has RSVP'd to a specific event
+     * @param {number} eventId - The ID of the event to check
+     * @returns {boolean} True if the user has RSVP'd, false otherwise
+     */
+    const hasUserRsvpd = (eventId: number): boolean => {
+        return !!userRsvps[eventId];
+    };
+
+    /**
+     * Handles toggling the RSVP status for an event
+     * Updates both the user's RSVP status and the event's attendee count
+     * Shows toast notifications for feedback
+     * 
+     * @param {number} eventId - The ID of the event to toggle RSVP for
+     */
+    const handleToggleRsvp = (eventId: number) => {
+        // First, check if event exists
+        const event = events.find(e => e.id === eventId);
+        if (!event) return;
+        
+        // Check if at max capacity and trying to RSVP
+        const isAtCapacity = event.maxAttendees !== undefined && 
+            event.attendees >= event.maxAttendees && 
+            !userRsvps[eventId];
+            
+        if (isAtCapacity) {
+            // Show error toast for max capacity
+            toast.error('This event has reached maximum capacity', {
+                duration: 3000,
+                style: {
+                    borderRadius: '10px',
+                    background: '#333',
+                    color: '#fff',
+                }
+            });
+            return;
+        }
+        
+        // Update local RSVP state
+        const newRsvpState = !userRsvps[eventId];
+        setUserRsvps(prev => ({
+            ...prev,
+            [eventId]: newRsvpState
+        }));
+        
+        // Update event attendee count
+        setEvents(prev => 
+            prev.map(event => {
+                if (event.id === eventId) {
+                    // Increment or decrement based on RSVP action
+                    const newAttendees = newRsvpState 
+                        ? event.attendees + 1 
+                        : Math.max(0, event.attendees - 1);
+                    
+                    return { 
+                        ...event, 
+                        attendees: newAttendees,
+                        // In a real implementation, we'd track user IDs
+                        rsvpUsers: newRsvpState 
+                            ? [...(event.rsvpUsers || []), 'current-user-id']
+                            : (event.rsvpUsers || []).filter(id => id !== 'current-user-id')
+                    };
+                }
+                return event;
+            })
+        );
+        
+        // Show success toast notification
+        if (newRsvpState) {
+            toast.success('You have successfully RSVP\'d to this event!', {
+                duration: 3000,
+                icon: '👍',
+                style: {
+                    borderRadius: '10px',
+                    background: '#333',
+                    color: '#fff',
+                }
+            });
+        } else {
+            toast.success('Your RSVP has been canceled', {
+                duration: 3000,
+                icon: '❌',
+                style: {
+                    borderRadius: '10px',
+                    background: '#333',
+                    color: '#fff',
+                }
+            });
+        }
+        
+        // In a real implementation, we would make an API call to update the backend
+        console.log(`User ${newRsvpState ? 'RSVP\'d to' : 'cancelled RSVP for'} event #${eventId}`);
     };
 
     return (
@@ -322,6 +438,8 @@ export default function Dashboard() {
                     event={selectedEvent}
                     isFavorited={isEventFavorited(selectedEvent)}
                     onToggleFavorite={handleToggleFavorite}
+                    isRsvpd={hasUserRsvpd(selectedEvent.id)}
+                    onToggleRsvp={handleToggleRsvp}
                 />
             )}
 
