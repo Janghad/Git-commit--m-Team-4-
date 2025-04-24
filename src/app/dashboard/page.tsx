@@ -31,6 +31,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import EventDetailsModal from '@/components/common/EventDetailsModal';
 import FavoritesModal from '@/components/common/FavoritesModal';
+import FacultyCodeModal from '@/components/common/FacultyCodeModal';
 import { DIETARY_TAGS } from '@/constants/eventData';
 
 /**
@@ -90,6 +91,7 @@ export default function Dashboard() {
     const router = useRouter();
     const { coords, error } = useUserLocation();
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
+    const [isFacultyCodeModalOpen, setIsFacultyCodeModalOpen] = useState(false);
     const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
     const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
@@ -182,6 +184,15 @@ export default function Dashboard() {
         router.push('/');
     };
 
+    /**
+     * Handles successful faculty code validation
+     * Opens the add event modal after successful authentication
+     */
+    const handleFacultyCodeSuccess = () => {
+        setIsFacultyCodeModalOpen(false);
+        setIsAddEventModalOpen(true);
+    };
+
     return (
         <div className="flex flex-col h-screen bg-zinc-900">
             <NavBar />
@@ -210,7 +221,7 @@ export default function Dashboard() {
                         </button>
 
                         <button
-                            onClick={() => setIsAddEventModalOpen(true)}
+                            onClick={() => setIsFacultyCodeModalOpen(true)}
                             className="flex items-center text-white hover:text-green-400 mt-8 transition-colors w-full text-left"
                         >
                             <PlusIcon className="w-5 h-5 mr-3" />
@@ -285,6 +296,13 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
+
+            {/* Faculty Code Modal */}
+            <FacultyCodeModal
+                isOpen={isFacultyCodeModalOpen}
+                onClose={() => setIsFacultyCodeModalOpen(false)}
+                onSuccess={handleFacultyCodeSuccess}
+            />
 
             {/* Add Event Modal */}
             <AddEventModal
