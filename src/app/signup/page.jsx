@@ -123,9 +123,7 @@ const Signup = () => {
     
     console.log("Profile inserted successfully!");
     
-    // redirect based on whether they're a student or faculty
-    if (userType === "student") router.push("/dietary-preferences")
-    else router.push("/dashboard")
+    router.push("dashboard")
   } 
 
   return (
