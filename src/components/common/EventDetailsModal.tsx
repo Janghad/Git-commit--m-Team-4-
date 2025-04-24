@@ -8,6 +8,7 @@
  * - Organizer information
  * - Attendance details
  * - Favorite functionality
+ * - RSVP functionality
  * 
  * The component follows the application's design system with:
  * - Consistent modal layout and backdrop
@@ -24,6 +25,8 @@
  *   event={selectedEvent}
  *   isFavorited={isEventFavorited(selectedEvent)}
  *   onToggleFavorite={(event) => handleToggleFavorite(event)}
+ *   isRsvpd={hasUserRsvpd(selectedEvent.id)}
+ *   onToggleRsvp={(eventId) => handleToggleRsvp(eventId)}
  * />
  */
 
@@ -32,6 +35,7 @@ import { Dialog } from '@headlessui/react';
 import { XMarkIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { DashboardEvent } from '@/types/event';
+import RsvpButton from './RsvpButton';
 
 /**
  * Props for the EventDetailsModal component
@@ -41,6 +45,8 @@ import { DashboardEvent } from '@/types/event';
  * @property {DashboardEvent} event - The event object containing all event details
  * @property {boolean} isFavorited - Whether the current event is in the user's favorites
  * @property {(event: DashboardEvent) => void} onToggleFavorite - Callback to toggle favorite status
+ * @property {boolean} isRsvpd - Whether the current user has RSVP'd to this event
+ * @property {(eventId: number) => void} onToggleRsvp - Callback to toggle RSVP status
  */
 interface EventDetailsModalProps {
     isOpen: boolean;
@@ -48,6 +54,8 @@ interface EventDetailsModalProps {
     event: DashboardEvent;
     isFavorited: boolean;
     onToggleFavorite: (event: DashboardEvent) => void;
+    isRsvpd: boolean;
+    onToggleRsvp: (eventId: number) => void;
 }
 
 export default function EventDetailsModal({
@@ -55,8 +63,15 @@ export default function EventDetailsModal({
     onClose,
     event,
     isFavorited,
-    onToggleFavorite
+    onToggleFavorite,
+    isRsvpd,
+    onToggleRsvp
 }: EventDetailsModalProps) {
+    // Check if event has a maximum capacity and if it's reached
+    const isAtCapacity = event.maxAttendees !== undefined && 
+        event.attendees >= event.maxAttendees && 
+        !isRsvpd;
+
     return (
         <Dialog
             open={isOpen}
@@ -120,9 +135,16 @@ export default function EventDetailsModal({
                                         {event.status === 'available' ? 'Available Now' : 'Starting Soon'}
                                     </p>
                                 </div>
+                                {/* RSVP Button Component - replaces static attendee count */}
                                 <div>
-                                    <p className="text-sm font-medium text-zinc-400">Attendees</p>
-                                    <p>{event.attendees} attending</p>
+                                    <p className="text-sm font-medium text-zinc-400">Attendance</p>
+                                    <RsvpButton 
+                                        eventId={event.id}
+                                        count={event.attendees}
+                                        isRsvpd={isRsvpd}
+                                        onToggle={onToggleRsvp}
+                                        disabled={isAtCapacity}
+                                    />
                                 </div>
                             </div>
                         </div>

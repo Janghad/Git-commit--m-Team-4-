@@ -40,6 +40,8 @@ export interface DashboardEvent extends Event {
     maxAttendees?: number;
     /** Whether the event is public or private */
     isPublic: boolean;
+    /** Array of user IDs who have RSVP'd to this event (would be implemented with actual user IDs in production) */
+    rsvpUsers?: string[];
 }
 
 /**
@@ -88,4 +90,14 @@ export interface EventFormProps {
     initialData?: EventFormData;
     onSubmit: (data: EventFormData) => Promise<void>;
     onClose: () => void;
+}
+
+/**
+ * RSVP status interface for tracking user RSVP state
+ * @property {boolean} isRsvpd - Whether the current user has RSVP'd to the event
+ * @property {number} count - Total number of RSVPs for the event
+ */
+export interface RsvpStatus {
+    isRsvpd: boolean;
+    count: number;
 } 
