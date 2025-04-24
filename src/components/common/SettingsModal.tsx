@@ -50,7 +50,7 @@ export default function SettingsModal({ isOpen, onClose, userData, onSignOut }: 
                 if (user) {
                     const { data, error } = await supabase
                         .from("profiles")
-                        .select("role")
+                        .select("role, full_name")
                         .eq("auth_id", user.id)
                         .single();
 

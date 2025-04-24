@@ -106,11 +106,12 @@ const Signup = () => {
     const profileData = {
       auth_id: user.id,
       email: user.email,
-      full_name: `${firstName} ${lastName}`,  
+      full_name: `${firstName} ${lastName}`,
       role: userType,
     };
     
     console.log("Inserting profile data:", profileData);
+
     
     const { error: insertError } = await supabase.from("profiles").insert([ profileData ]);
     
@@ -121,6 +122,12 @@ const Signup = () => {
     }
     
     console.log("Profile inserted successfully!");
+    
+    localStorage.setItem('userProfile', JSON.stringify({
+      full_name: `${firstName} ${lastName}`,
+      email: email,
+      role: userType
+    }));
     
     router.push("dashboard")
   } 

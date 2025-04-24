@@ -38,43 +38,70 @@ const NavBar = () => {
   //utlizing useEffect to fetch the user name
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("auth_id", user.id)
-          .single();
-
-        if (data && !error) {
-          setUserName(data.full_name);
-          setUserEmail(user.email);
-          // Generate initials from full name
-          const initials = data.full_name
+      try {
+        // Checks if we have cached user data from signup
+        const cachedProfile = localStorage.getItem('userProfile');
+        if (cachedProfile) {
+          const profile = JSON.parse(cachedProfile);
+          console.log("Using cached profile data:", profile);
+          setUserName(profile.full_name);
+          setUserEmail(profile.email);
+          
+          // Generate initials normally but from cached
+          const initials = profile.full_name
             .split(' ')
             .map(name => name[0])
             .join('')
             .toUpperCase()
             .slice(0, 2);
           setUserInitials(initials);
-        } else {
-          const { data: userData } = await supabase.auth.getUser();
-          if (userData && userData.user) {
-            const displayName = userData.user.user_metadata?.full_name || 
-                              userData.user.email?.split('@')[0] || 
-                              "User";
-            setUserName(displayName);
-            setUserEmail(userData.user.email);
-            setUserInitials(displayName[0].toUpperCase());
+        }
+        
+        const { data: { user } } = await supabase.auth.getUser();
+  
+        if (user) {
+          const { data, error } = await supabase
+            .from("profiles")
+            .select("full_name")  
+            .eq("auth_id", user.id)
+            .single();
+  
+          if (data && !error) {
+            setUserName(data.full_name);
+            setUserEmail(user.email);
+            // Generate initials from full name
+            const initials = data.full_name
+              .split(' ')
+              .map(name => name[0])
+              .join('')
+              .toUpperCase()
+              .slice(0, 2);
+            setUserInitials(initials);
+            
+            // Clear cached profile data
+            localStorage.removeItem('userProfile');
           } else {
-            setUserName("User");
-            setUserInitials("U");
+            const { data: userData } = await supabase.auth.getUser();
+            if (userData && userData.user) {
+              const displayName = userData.user.user_metadata?.full_name || 
+                userData.user.email?.split('@')[0] || 
+                "User";
+              setUserName(displayName);
+              setUserEmail(userData.user.email);
+              setUserInitials(displayName[0].toUpperCase());
+            } else {
+              setUserName("User");
+              setUserInitials("U");
+            }
           }
         }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setUserName("User");
+        setUserInitials("U");
       }
     };
-
+  
     fetchUserData();
   }, []);
 
