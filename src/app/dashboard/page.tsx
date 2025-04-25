@@ -309,6 +309,24 @@ export default function Dashboard() {
         console.log(`User ${newRsvpState ? 'RSVP\'d to' : 'cancelled RSVP for'} event #${eventId}`);
     };
 
+    /**
+     * Handles editing an existing event
+     * @param {DashboardEvent} event - The event to edit
+     */
+    const handleEditEvent = (event: DashboardEvent) => {
+        // In a real implementation, this would open an edit form with the event data
+        // For now, we'll just show a toast notification
+        toast.success(`Editing event: ${event.title}`);
+        
+        // Close the details modal
+        setIsEventDetailsModalOpen(false);
+        
+        // Open the add event modal with initial data
+        // This would be implemented in a real application
+        // For demo purposes, just show a confirmation toast
+        toast(`Faculty member ${event.organizerName} is editing this event`);
+    };
+
     return (
         <div className="flex flex-col h-screen bg-zinc-900">
             <NavBar />
@@ -440,6 +458,7 @@ export default function Dashboard() {
                     onToggleFavorite={handleToggleFavorite}
                     isRsvpd={hasUserRsvpd(selectedEvent.id)}
                     onToggleRsvp={handleToggleRsvp}
+                    onEditEvent={handleEditEvent}
                 />
             )}
 

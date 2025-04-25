@@ -30,12 +30,14 @@
  * />
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { DashboardEvent } from '@/types/event';
 import RsvpButton from './RsvpButton';
+import supabase from '@/lib/supabaseClient';
+import toast from 'react-hot-toast';
 
 /**
  * Props for the EventDetailsModal component
@@ -47,6 +49,7 @@ import RsvpButton from './RsvpButton';
  * @property {(event: DashboardEvent) => void} onToggleFavorite - Callback to toggle favorite status
  * @property {boolean} isRsvpd - Whether the current user has RSVP'd to this event
  * @property {(eventId: number) => void} onToggleRsvp - Callback to toggle RSVP status
+ * @property {(event: DashboardEvent) => void} onEditEvent - Callback to edit the event
  */
 interface EventDetailsModalProps {
     isOpen: boolean;
@@ -56,6 +59,7 @@ interface EventDetailsModalProps {
     onToggleFavorite: (event: DashboardEvent) => void;
     isRsvpd: boolean;
     onToggleRsvp: (eventId: number) => void;
+    onEditEvent?: (event: DashboardEvent) => void;
 }
 
 export default function EventDetailsModal({
@@ -65,12 +69,79 @@ export default function EventDetailsModal({
     isFavorited,
     onToggleFavorite,
     isRsvpd,
-    onToggleRsvp
+    onToggleRsvp,
+    onEditEvent
 }: EventDetailsModalProps) {
     // Check if event has a maximum capacity and if it's reached
     const isAtCapacity = event.maxAttendees !== undefined && 
         event.attendees >= event.maxAttendees && 
         !isRsvpd;
+    
+    // State to track if current user is the organizer and is faculty
+    const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    // Check if current user is the event organizer and has faculty role
+    useEffect(() => {
+        const checkAuthorization = async () => {
+            try {
+                setIsLoading(true);
+                
+                // Get current user
+                const { data: { user } } = await supabase.auth.getUser();
+                
+                if (!user) {
+                    setIsAuthorized(false);
+                    return;
+                }
+                
+                // Get user profile to check role
+                const { data: profile, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("role, email")
+                    .eq("auth_id", user.id)
+                    .single();
+                
+                if (profileError) {
+                    console.error("Error fetching profile:", profileError);
+                    setIsAuthorized(false);
+                    return;
+                }
+                
+                // Check if user is faculty AND is the event organizer
+                if (profile && 
+                    profile.role === "faculty" && 
+                    (profile.email === event.organizerEmail)) {
+                    setIsAuthorized(true);
+                } else {
+                    setIsAuthorized(false);
+                }
+            } catch (error) {
+                console.error("Error checking authorization:", error);
+                setIsAuthorized(false);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        
+        if (isOpen) {
+            checkAuthorization();
+        }
+    }, [isOpen, event.organizerEmail]);
+
+    // Handle edit button click
+    const handleEditClick = () => {
+        if (!isAuthorized) {
+            toast.error("Only the faculty member who created this event can edit it.");
+            return;
+        }
+        
+        if (onEditEvent) {
+            onEditEvent(event);
+        } else {
+            toast.error("Edit functionality not available");
+        }
+    };
 
     return (
         <Dialog
@@ -160,22 +231,42 @@ export default function EventDetailsModal({
                         {/* Food Offerings */}
                         <div>
                             <h4 className="text-sm font-medium text-zinc-400 mb-2">Food Offerings</h4>
-                            <div className="space-y-3">
-                                {event.foodOfferings.map((offering, index) => (
-                                    <div key={index} className="bg-zinc-700/50 rounded-lg p-3">
-                                        <p className="text-white font-medium mb-2">{offering.name}</p>
-                                        {offering.dietaryTags.length > 0 && (
-                                            <div className="flex flex-wrap gap-2">
-                                                {offering.dietaryTags.map((tag) => (
-                                                    <span
-                                                        key={tag.id}
-                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-300"
-                                                    >
-                                                        {tag.name}
-                                                    </span>
-                                                ))}
-                                            </div>
+                            <div className="space-y-4">
+                                {event.foodOfferings.map((food, index) => (
+                                    <div key={index} className="bg-zinc-700/50 rounded-lg p-4">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h5 className="font-medium text-white">{food.name}</h5>
+                                            {food.temperature && (
+                                                <span className="text-xs font-medium px-2 py-1 rounded bg-zinc-600 text-zinc-300">
+                                                    {food.temperature.charAt(0).toUpperCase() + food.temperature.slice(1)}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {food.description && (
+                                            <p className="text-sm text-zinc-300 mb-2">{food.description}</p>
                                         )}
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            {food.dietaryTags.map((tag, tagIndex) => (
+                                                <span 
+                                                    key={tagIndex}
+                                                    className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-500/10 text-green-400"
+                                                >
+                                                    {tag.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-zinc-400">
+                                            {food.quantity && (
+                                                <div>
+                                                    <span className="font-medium">Quantity:</span> {food.quantity}
+                                                </div>
+                                            )}
+                                            {food.servingSize && (
+                                                <div>
+                                                    <span className="font-medium">Serving Size:</span> {food.servingSize}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -224,9 +315,16 @@ export default function EventDetailsModal({
                             </button>
                             <button
                                 type="button"
-                                className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-500 transition-colors duration-200"
+                                onClick={handleEditClick}
+                                className={`px-6 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                                    isAuthorized 
+                                        ? 'bg-green-600 text-white hover:bg-green-500'
+                                        : 'bg-zinc-600 text-zinc-300 hover:bg-zinc-500 cursor-not-allowed'
+                                }`}
+                                aria-label={isAuthorized ? "Edit event" : "Only the organizer can edit this event"}
+                                title={isAuthorized ? "Edit event" : "Only the faculty member who created this event can edit it"}
                             >
-                                Edit
+                                {isLoading ? 'Checking...' : 'Edit'}
                             </button>
                         </div>
                     </div>
