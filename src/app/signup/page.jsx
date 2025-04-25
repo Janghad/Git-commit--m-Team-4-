@@ -134,6 +134,8 @@ const Signup = () => {
       full_name: `${firstName} ${lastName}`,
       role: userType,
     }
+
+    localStorage.setItem('userProfile', JSON.stringify(profileData));
     
     console.log("Inserting profile data:", profileData);
     
