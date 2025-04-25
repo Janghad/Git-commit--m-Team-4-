@@ -25,12 +25,12 @@ import { useUserLocation } from '@/hooks/useUserLocation';
 import { DashboardEvent, EventFormData } from '@/types/event';
 import NavBar from '@/components/navigation/NavBar';
 import AddEventModal from '@/components/common/AddEventModal';
-import { HomeIcon, HeartIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, CalendarIcon, PlusIcon } from '@heroicons/react/24/outline';
 import supabase from "@/lib/supabaseClient";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import EventDetailsModal from '@/components/common/EventDetailsModal';
-import FavoritesModal from '@/components/common/FavoritesModal';
+import MyEventsModal from '@/components/common/MyEventsModal';
 import FacultyCodeModal from '@/components/common/FacultyCodeModal';
 import { DIETARY_TAGS } from '@/constants/eventData';
 import toast from 'react-hot-toast';
@@ -94,10 +94,9 @@ export default function Dashboard() {
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
     const [isFacultyCodeModalOpen, setIsFacultyCodeModalOpen] = useState(false);
     const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
-    const [isFavoritesModalOpen, setIsFavoritesModalOpen] = useState(false);
+    const [isMyEventsModalOpen, setIsMyEventsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
     const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
-    const [favoriteEvents, setFavoriteEvents] = useState<DashboardEvent[]>([]);
     
     // New state for tracking user RSVPs
     const [userRsvps, setUserRsvps] = useState<Record<number, boolean>>({});
@@ -130,30 +129,6 @@ export default function Dashboard() {
             setSelectedEvent(event);
             setIsEventDetailsModalOpen(true);
         }
-    };
-
-    /**
-     * Handles toggling an event's favorite status
-     * @param {DashboardEvent} event - The event to toggle
-     */
-    const handleToggleFavorite = (event: DashboardEvent) => {
-        setFavoriteEvents(prev => {
-            const isCurrentlyFavorited = prev.some(e => e.id === event.id);
-            if (isCurrentlyFavorited) {
-                return prev.filter(e => e.id !== event.id);
-            } else {
-                return [...prev, event];
-            }
-        });
-    };
-
-    /**
-     * Checks if an event is favorited
-     * @param {DashboardEvent} event - The event to check
-     * @returns {boolean} True if the event is favorited
-     */
-    const isEventFavorited = (event: DashboardEvent): boolean => {
-        return favoriteEvents.some(e => e.id === event.id);
     };
 
     /**
@@ -327,6 +302,14 @@ export default function Dashboard() {
         toast(`Faculty member ${event.organizerName} is editing this event`);
     };
 
+    /**
+     * Gets the list of events that the user has RSVP'd to
+     * @returns {DashboardEvent[]} Array of events the user has RSVP'd to
+     */
+    const getUserRsvpdEvents = (): DashboardEvent[] => {
+        return events.filter(event => !!userRsvps[event.id]);
+    };
+
     return (
         <div className="flex flex-col h-screen bg-zinc-900">
             <NavBar />
@@ -347,11 +330,11 @@ export default function Dashboard() {
                         </button>
 
                         <button 
-                            onClick={() => setIsFavoritesModalOpen(true)}
+                            onClick={() => setIsMyEventsModalOpen(true)}
                             className="flex items-center text-white hover:text-green-400 transition-colors w-full text-left"
                         >
-                            <HeartIcon className="w-5 h-5 mr-3" />
-                            My Favorites
+                            <CalendarIcon className="w-5 h-5 mr-3" />
+                            My Events
                         </button>
 
                         <button
@@ -454,22 +437,20 @@ export default function Dashboard() {
                         setSelectedEvent(null);
                     }}
                     event={selectedEvent}
-                    isFavorited={isEventFavorited(selectedEvent)}
-                    onToggleFavorite={handleToggleFavorite}
                     isRsvpd={hasUserRsvpd(selectedEvent.id)}
                     onToggleRsvp={handleToggleRsvp}
                     onEditEvent={handleEditEvent}
                 />
             )}
 
-            {/* Favorites Modal */}
-            <FavoritesModal
-                isOpen={isFavoritesModalOpen}
-                onClose={() => setIsFavoritesModalOpen(false)}
-                favoriteEvents={favoriteEvents}
+            {/* My Events Modal */}
+            <MyEventsModal
+                isOpen={isMyEventsModalOpen}
+                onClose={() => setIsMyEventsModalOpen(false)}
+                myEvents={getUserRsvpdEvents()}
                 onViewDetails={(event) => {
                     setSelectedEvent(event);
-                    setIsFavoritesModalOpen(false);
+                    setIsMyEventsModalOpen(false);
                     setIsEventDetailsModalOpen(true);
                 }}
             />

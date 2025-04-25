@@ -1,13 +1,12 @@
 /**
  * EventDetailsModal Component
  * 
- * A modal component for displaying detailed event information and managing favorites.
+ * A modal component for displaying detailed event information and managing event RSVPs.
  * This component provides a comprehensive view of an event's details including:
  * - Basic event information (title, time, location, status)
  * - Food offerings with dietary tags
  * - Organizer information
  * - Attendance details
- * - Favorite functionality
  * - RSVP functionality
  * 
  * The component follows the application's design system with:
@@ -23,8 +22,6 @@
  *   isOpen={isModalOpen}
  *   onClose={() => setIsModalOpen(false)}
  *   event={selectedEvent}
- *   isFavorited={isEventFavorited(selectedEvent)}
- *   onToggleFavorite={(event) => handleToggleFavorite(event)}
  *   isRsvpd={hasUserRsvpd(selectedEvent.id)}
  *   onToggleRsvp={(eventId) => handleToggleRsvp(eventId)}
  * />
@@ -32,8 +29,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
-import { XMarkIcon, HeartIcon } from '@heroicons/react/24/outline';
-import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { DashboardEvent } from '@/types/event';
 import RsvpButton from './RsvpButton';
 import supabase from '@/lib/supabaseClient';
@@ -45,8 +41,6 @@ import toast from 'react-hot-toast';
  * @property {boolean} isOpen - Controls the visibility of the modal
  * @property {() => void} onClose - Callback function to close the modal
  * @property {DashboardEvent} event - The event object containing all event details
- * @property {boolean} isFavorited - Whether the current event is in the user's favorites
- * @property {(event: DashboardEvent) => void} onToggleFavorite - Callback to toggle favorite status
  * @property {boolean} isRsvpd - Whether the current user has RSVP'd to this event
  * @property {(eventId: number) => void} onToggleRsvp - Callback to toggle RSVP status
  * @property {(event: DashboardEvent) => void} onEditEvent - Callback to edit the event
@@ -55,8 +49,6 @@ interface EventDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
     event: DashboardEvent;
-    isFavorited: boolean;
-    onToggleFavorite: (event: DashboardEvent) => void;
     isRsvpd: boolean;
     onToggleRsvp: (eventId: number) => void;
     onEditEvent?: (event: DashboardEvent) => void;
@@ -66,8 +58,6 @@ export default function EventDetailsModal({
     isOpen,
     onClose,
     event,
-    isFavorited,
-    onToggleFavorite,
     isRsvpd,
     onToggleRsvp,
     onEditEvent
@@ -160,26 +150,13 @@ export default function EventDetailsModal({
                         <Dialog.Title className="text-2xl font-bold text-white">
                             Event Details
                         </Dialog.Title>
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => onToggleFavorite(event)}
-                                className="text-white hover:text-green-400 transition-colors"
-                                aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
-                            >
-                                {isFavorited ? (
-                                    <HeartIconSolid className="h-6 w-6 text-green-500" />
-                                ) : (
-                                    <HeartIcon className="h-6 w-6" />
-                                )}
-                            </button>
-                            <button
-                                onClick={onClose}
-                                className="text-zinc-400 hover:text-white transition-colors"
-                                aria-label="Close modal"
-                            >
-                                <XMarkIcon className="h-6 w-6" />
-                            </button>
-                        </div>
+                        <button
+                            onClick={onClose}
+                            className="text-zinc-400 hover:text-white transition-colors"
+                            aria-label="Close modal"
+                        >
+                            <XMarkIcon className="h-6 w-6" />
+                        </button>
                     </div>
 
                     {/* Content */}
