@@ -26,13 +26,22 @@ type LightPreset = "dawn" | "day" | "dusk" | "night";
  * ```
  */
 export default function Map({ events, onMarkerClick, userPos }: MapProps) {
+    // Define default map position constants at the top of the component
+    const DEFAULT_CENTER: [number, number] = [-71.1097, 42.3505]; // BU's coordinates
+    const DEFAULT_ZOOM = 15.3;
+    const DEFAULT_PITCH = 45;
+    const DEFAULT_BEARING = 0;
+
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const markersRef = useRef<mapboxgl.Marker[]>([]);
+    
+    // Update mapStateRef to use our default values
     const mapStateRef = useRef({
-        center: [-71.1097, 42.3505] as [number, number],
-        zoom: 15,
-        pitch: 45
+        center: DEFAULT_CENTER,
+        zoom: DEFAULT_ZOOM,
+        pitch: DEFAULT_PITCH,
+        bearing: DEFAULT_BEARING
     });
 
     const [currentLightPreset, setCurrentLightPreset] = useState<LightPreset>("day");
@@ -69,18 +78,28 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
     }, []);
 
     /**
-     * Resets the map view to the default position (BU campus center)
+     * Resets the map view to the default position with a smooth animation
      */
     const resetMapPosition = useCallback(() => {
-        if (mapRef.current) {
-            mapRef.current.flyTo({
-                center: mapStateRef.current.center,
-                zoom: mapStateRef.current.zoom,
-                pitch: mapStateRef.current.pitch,
-                essential: true,
-                duration: 1000
-            });
-        }
+        if (!mapRef.current) return;
+
+        // Add a subtle ease animation for a smoother transition
+        mapRef.current.easeTo({
+            center: DEFAULT_CENTER,
+            zoom: DEFAULT_ZOOM,
+            pitch: DEFAULT_PITCH,
+            bearing: DEFAULT_BEARING,
+            duration: 1500, // Animation duration in milliseconds
+            easing: (t) => t * (2 - t), // Ease-out function for smooth deceleration
+        });
+
+        // Update the mapStateRef to match
+        mapStateRef.current = {
+            center: DEFAULT_CENTER,
+            zoom: DEFAULT_ZOOM,
+            pitch: DEFAULT_PITCH,
+            bearing: DEFAULT_BEARING
+        };
     }, []);
 
     /**
@@ -89,45 +108,81 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
     const updateMapLighting = useCallback(() => {
         const newLightPreset = getLightPresetByTime();
         
-        if (newLightPreset !== currentLightPreset) {
+        if (newLightPreset !== currentLightPreset && mapRef.current) {
+            // Update the visual state
             setCurrentLightPreset(newLightPreset);
+            
+            // Actually update the map's lighting using Mapbox's configuration API
+            mapRef.current.setConfigProperty('basemap', 'lightPreset', newLightPreset);
+
+            // Optionally adjust ambient light intensity based on time of day
+            const lightIntensity = {
+                dawn: 0.5,
+                day: 1.0,
+                dusk: 0.3,
+                night: 0.1
+            }[newLightPreset];
+
+            mapRef.current.setLight({
+                intensity: lightIntensity,
+                anchor: "viewport"
+            });
         }
     }, [currentLightPreset, getLightPresetByTime]);
 
-    // Initialize map
+    // Initialize map with proper configuration
     useEffect(() => {
         if (!mapContainerRef.current) return;
 
-        // Initialize map with proper token and configuration
         mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
         
         mapRef.current = new mapboxgl.Map({
             container: mapContainerRef.current as HTMLElement,
             style: 'mapbox://styles/mapbox/standard',
-            center: mapStateRef.current.center,
-            zoom: mapStateRef.current.zoom,
-            pitch: mapStateRef.current.pitch,
+            center: DEFAULT_CENTER,
+            zoom: DEFAULT_ZOOM,
+            pitch: DEFAULT_PITCH,
+            bearing: DEFAULT_BEARING,
             antialias: true
         });
 
-        // Set initial light preset based on time
+        // Set initial light preset and configuration
         const initialLightPreset = getLightPresetByTime();
         setCurrentLightPreset(initialLightPreset);
 
-        // Handle map movement without triggering re-renders
+        // Wait for map to load before setting initial lighting
+        mapRef.current.on('load', () => {
+            mapRef.current?.setConfigProperty('basemap', 'lightPreset', initialLightPreset);
+            
+            // Set initial light intensity
+            const initialLightIntensity = {
+                dawn: 0.5,
+                day: 1.0,
+                dusk: 0.3,
+                night: 0.1
+            }[initialLightPreset];
+
+            mapRef.current?.setLight({
+                intensity: initialLightIntensity,
+                anchor: "viewport"
+            });
+        });
+
+        // Update lighting every minute
+        const lightingInterval = setInterval(updateMapLighting, 60000);
+
+        // Handle map movement
         mapRef.current.on("move", () => {
             if (mapRef.current) {
                 const mapCenter = mapRef.current.getCenter();
                 mapStateRef.current = {
                     center: [mapCenter.lng, mapCenter.lat],
                     zoom: mapRef.current.getZoom(),
-                    pitch: mapRef.current.getPitch()
+                    pitch: mapRef.current.getPitch(),
+                    bearing: mapRef.current.getBearing()
                 };
             }
         });
-
-        // Set up interval to update lighting based on time
-        const lightingInterval = setInterval(updateMapLighting, 60000);
 
         return () => {
             clearInterval(lightingInterval);
@@ -135,7 +190,7 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
                 mapRef.current.remove();
             }
         };
-    }, []); // Empty dependency array for initialization only
+    }, [updateMapLighting, getLightPresetByTime]);
 
     // Handle markers and user position updates
     useEffect(() => {
@@ -205,7 +260,7 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
             if (currentCenter.lng !== userPos[0] || currentCenter.lat !== userPos[1]) {
                 mapRef.current.flyTo({
                     center: userPos,
-                    zoom: 15,
+                    zoom: 15.3,
                     essential: true,
                     duration: 1000
                 });
@@ -226,14 +281,23 @@ export default function Map({ events, onMarkerClick, userPos }: MapProps) {
                 className="opacity-100 h-full w-full rounded-[20px] overflow-hidden"
             />
             
-            {/* Reset Button */}
+            {/* Enhanced Reset Button with loading state and better feedback */}
             <button 
                 onClick={resetMapPosition}
-                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-zinc-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2 z-10"
+                className="absolute top-4 right-4 bg-white/90 hover:bg-white text-zinc-800 font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-200 flex items-center gap-2 z-10 active:scale-95"
                 aria-label="Reset map view"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
+                <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    className="h-5 w-5 transition-transform duration-200" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor"
+                >
+                    <path 
+                        fillRule="evenodd" 
+                        d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" 
+                        clipRule="evenodd" 
+                    />
                 </svg>
                 Reset View
             </button>
