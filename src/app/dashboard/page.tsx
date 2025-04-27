@@ -97,7 +97,7 @@ export default function Dashboard() {
     const [isMyEventsModalOpen, setIsMyEventsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
     const [events, setEvents] = useState<DashboardEvent[]>(mockEvents);
-    
+    const [userRole, setUserRole] = useState("student"); //tracking user role (starts with student for security)
     // New state for tracking user RSVPs
     const [userRsvps, setUserRsvps] = useState<Record<number, boolean>>({});
     
