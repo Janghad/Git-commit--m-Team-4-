@@ -113,6 +113,27 @@ export default function Dashboard() {
         }
     }, []);
     
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            try {
+                const {data: {user}} = await supabase.auth.getUser();
+                if (user) {
+                    const {data, error} = await supabase
+                        .from ("profiles")
+                        .select("role")
+                        .eq("auth_id", user.id)
+                        .single();
+
+                    if (data && !error) {
+                        setUserRole(data.role)
+                    }
+                }
+            } catch (error) {
+                console.error("Unable to fetch the user's role", error)
+            }
+        };
+        fetchUserRole();
+    }, []);
     // Save RSVPs to localStorage whenever they change
     useEffect(() => {
         localStorage.setItem('userRsvps', JSON.stringify(userRsvps));
@@ -336,7 +357,8 @@ export default function Dashboard() {
                             <CalendarIcon className="w-5 h-5 mr-3" />
                             My Events
                         </button>
-
+                    
+                    {userRole === "faculty" && (
                         <button
                             onClick={() => setIsFacultyCodeModalOpen(true)}
                             className="flex items-center text-white hover:text-green-400 mt-8 transition-colors w-full text-left"
@@ -344,6 +366,7 @@ export default function Dashboard() {
                             <PlusIcon className="w-5 h-5 mr-3" />
                             Add Event
                         </button>
+                    )}
                     </nav>
                 </div>
 
