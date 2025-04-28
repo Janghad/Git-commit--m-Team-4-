@@ -5,7 +5,7 @@ import { Building, DietaryTag } from '../constants/eventData';
  * Represents the core event data structure
  */
 export interface Event {
-    id: number;
+    id: string;
     title: string;
     location: string;
     time: string;
