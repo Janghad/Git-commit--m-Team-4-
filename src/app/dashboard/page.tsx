@@ -109,26 +109,40 @@ useEffect(() => {
 
     // Set up realtime subscription
     const eventsNotification = supabase
-        .channel("public:events")
-        .on("INSERT", (payload: any) => {
+    .channel("public:events")
+    .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'events' },
+        (payload: any) => {
             setEvents(prev => [...prev, transformEventRecord(payload.new)]);
             toast.success("New event added!");
-        })
-        .on("UPDATE", (payload: any) => {
-            setEvents(prev => prev.map(event => 
-                event.id === payload.new.id ? transformEventRecord(payload.new) : event
-            ));
-            toast.success("Event updated!");
-        })
-        .on("DELETE", (payload: any) => {
+        }
+    )
+    .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'events' },
+        (payload: any) => {
+        setEvents(prev => prev.map(event => 
+            event.id === payload.new.id ? transformEventRecord(payload.new) : event
+        ));
+        toast.success("Event updated!");
+        }
+    )
+    .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'events' },
+        (payload: any) => {
             setEvents(prev => prev.filter(event => event.id !== payload.old.id));
             toast.success("Event deleted!");
-        })
-        .subscribe();
+        }
+    )
+    .subscribe();
     return () => {
         supabase.removeChannel(eventsNotification);
     };
 }, [router]);
+
+
     //Helper function to transform event records from database to Frontend format
 
     const transformEventRecord = (record: any): DashboardEvent => {
