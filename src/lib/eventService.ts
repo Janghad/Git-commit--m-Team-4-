@@ -13,7 +13,7 @@ interface EventTable {
     description: string | null;
     start_time: string;
     end_time: string;
-    orgaznizer_id: string;
+    organizer_id: string;
     max_attendees: number;
     status: "available" | "starting soon" | "cancelled";
     is_public: boolean;
@@ -159,7 +159,9 @@ export async function getUserRsvp(userId: string) {
                     title: record.title,
                     location: record.location,
                     time: timeRange,
-                    attendees: record.event_attendees?.length || 0,
+                    attendees: Array.isArray(record.event_attendees) 
+                        ? record.event_attendees.length 
+                        : (record.event_attendees?.count || 0),
                     status: record.status,
                     coords: coords,
                     description: record.description || "",
