@@ -101,3 +101,12 @@ export interface RsvpStatus {
     isRsvpd: boolean;
     count: number;
 } 
+
+export interface FoodOffering {
+    name: string;
+    dietaryTags: Array<DietaryTag>;
+    description?: string;
+    quantity?: string;
+    servingSize?: string;
+    temperature?: 'hot' | 'cold' | 'room temperature';
+}
