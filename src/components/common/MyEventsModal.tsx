@@ -103,7 +103,7 @@ export default function MyEventsModal({
                                             </h3>
                                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-300 flex items-center">
                                                 <CheckIcon className="h-3 w-3 mr-1" />
-                                                You're Going
+                                                You&apos;re Going
                                             </span>
                                         </div>
                                         <div className="space-y-2 text-sm text-zinc-300 mb-4">
