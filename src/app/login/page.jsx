@@ -100,10 +100,14 @@ const Login = () => {
           .eq("auth_id", data.user.id) //refernced ChatGPT to test user's existence
           .single()
 
+      
+
       //PGRST116 is an error code from PostgREST used by Supabase that essentially means no results found
       if (profileError && profileError.code !== 'PGRST116') {
         console.error("Error fetching profile:", profileError)
       }
+
+
 
 
       //for the case in which the user has an account but does not have other necessary data stores 
