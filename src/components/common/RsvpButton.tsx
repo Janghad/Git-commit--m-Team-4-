@@ -71,7 +71,7 @@ export default function RsvpButton({
                 {isRsvpd ? (
                     <>
                         <CheckIcon className="h-5 w-5 mr-2" />
-                        <span>I'm Going</span>
+                        <span>I&apos;m Going</span>
                     </>
                 ) : (
                     <>
