@@ -23,19 +23,28 @@ interface EventTable {
 }
 
 export async function fetchPublicEvents() {
-    const { data, error } = await supabase
-        .from("events")
-        .select(`*, profiles:organizer_id (name,email)`)
-        .eq("is_public", true)
-        .eq("status", "available")
-        .order("start_time", { ascending: true });
+    try {
+        // Add more detailed logging
+        console.log("Attempting to fetch public events");
+        
+        const { data, error } = await supabase
+            .from("events")
+            .select(`*, profiles:organizer_id (full_name,email)`)
+            .eq("is_public", true)
+            .eq("status", "available")
+            .order("start_time", { ascending: true });
 
-    if (error) {
-        console.error("Error fetching public events:", error);
-        throw error;
+        if (error) {
+            console.error("Error fetching public events:", error.message, error.details);
+            throw error;
+        }
+
+        console.log("Events fetched successfully:", data?.length || 0);
+        return transformEvents(data || []);
+    } catch (err) {
+        console.error("Exception in fetchPublicEvents:", err);
+        throw err;
     }
-
-    return transformEvents(data || []);
 }
 
 export async function getUserRsvp(userId: string) {
@@ -166,7 +175,7 @@ export async function getUserRsvp(userId: string) {
                     coords: coords,
                     description: record.description || "",
                     foodOfferings: record.food_offerings || [],
-                    organizerName: record.profiles?.name || "",
+                    organizerName: record.profiles?.full_name || "",
                     organizerEmail: record.profiles?.email || "",
                     maxAttendees: record.max_attendees,
                     isPublic: record.is_public,
