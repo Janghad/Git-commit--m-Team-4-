@@ -22,7 +22,7 @@
  *   isOpen={isModalOpen}
  *   onClose={() => setIsModalOpen(false)}
  *   event={selectedEvent}
- *   isRsvpd={hasUserRsvpd(selectedEvent.id)}
+ *   isRsvpd={hasUserRsvpd(Number(selectedEvent.id))}
  *   onToggleRsvp={(eventId) => handleToggleRsvp(eventId)}
  * />
  */
@@ -187,7 +187,7 @@ export default function EventDetailsModal({
                                 <div>
                                     <p className="text-sm font-medium text-zinc-400">Attendance</p>
                                     <RsvpButton 
-                                        eventId={event.id}
+                                        eventId={Number(event.id)}  // Convert string ID to number here
                                         count={event.attendees}
                                         isRsvpd={isRsvpd}
                                         onToggle={onToggleRsvp}
