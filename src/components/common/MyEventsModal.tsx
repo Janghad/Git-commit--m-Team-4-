@@ -85,7 +85,7 @@ export default function MyEventsModal({
                     <div className="flex-1 overflow-y-auto">
                         {myEvents.length === 0 ? (
                             <div className="text-center py-8">
-                                <p className="text-zinc-400">You haven't RSVP'd to any events yet</p>
+                                <p className="text-zinc-400">You haven&apos;t RSVP&apos;d</p>
                                 <p className="text-sm text-zinc-500 mt-2">
                                     Events you RSVP to will appear here
                                 </p>
