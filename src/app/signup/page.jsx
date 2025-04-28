@@ -117,7 +117,14 @@ const Signup = () => {
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
-    })
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          full_name: `${firstName} ${lastName}`,
+          role: userType
+        }
+      }
+    });
     
     if (error) {
       console.error("Signup error. Please try again.", error.message)
@@ -148,8 +155,8 @@ const Signup = () => {
     }
     
     console.log("Profile inserted successfully!");
-    
-    router.push("dashboard")
+    toast.success("Signup successful! Please check your email to confirm your account before logging in.");
+    router.push("/login")
   }
 
   return (

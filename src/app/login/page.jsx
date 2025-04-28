@@ -86,6 +86,12 @@ const Login = () => {
         throw new Error(signInError.message)
       }
 
+      if (data?.user && !data.user.email_confirmed_at) {
+        setError("Please confirm your email before logging in. Check your inbox for a confirmation link.");
+        setLoading(false);
+        return;
+      }
+
       //Checks if the user exisits in the custom profiles table
       if(data?.user) {
         const {data:profile, error:profileError} = await supabase
@@ -103,7 +109,7 @@ const Login = () => {
       //for the case in which the user has an account but does not have other necessary data stores 
       //this occurs when user signs up with google authenticate 
       if (!profile) {
-        router.push("/dietary-preferences")
+        router.push("/dashboard")
       } else if (userType === "student") {
         router.push("/dashboard")
       } else {
