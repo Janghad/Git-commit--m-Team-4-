@@ -9,7 +9,7 @@ import { Event } from '@/types/map';
 // Mock events data - replace with real data later
 const mockEvents: Event[] = [
     {
-        id: 1,
+        id: "1",
         title: "Computer Science Seminar",
         location: "CAS Building, Room 201",
         time: "Today, 12:30 PM - 2:00 PM",
@@ -18,7 +18,7 @@ const mockEvents: Event[] = [
         coords: [-71.1097, 42.3505]
     },
     {
-        id: 2,
+        id: "2",
         title: "Engineering Mixer",
         location: "Engineering Building, Lobby",
         time: "Today, 4:00 PM - 6:00 PM",
@@ -36,7 +36,7 @@ export default function LandingPage() {
         router.push('/login');
     };
 
-    const handleMarkerClick = (eventId: number) => {
+    const handleMarkerClick = (eventId: string) => {
         console.log(`Clicked event: ${eventId}`);
         // Add your event click handling logic here
     };
