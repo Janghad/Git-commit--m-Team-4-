@@ -42,6 +42,23 @@ const Login = () => {
   const [formSubmitted, setFormSubmitted] = useState(false)
 
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const message = params.get('message');
+    const errorParam = params.get('error');
+    
+    if (message === 'email-confirmed') {
+      toast.success('Email confirmed successfully! You can now log in.');
+    }
+    
+    if (errorParam === 'auth-error') {
+      toast.error('Authentication error. Please try again.');
+    }
+    
+    if (errorParam === 'unknown') {
+      toast.error('An unexpected error occurred. Please try again.');
+    }
+  }, []);
   
   //If the user is already loggin in, redirect to the dashboard
   useEffect (() => {
