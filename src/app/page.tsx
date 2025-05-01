@@ -31,13 +31,13 @@ const teamMembers = [
         name: "Ryan Rodriguez",
         role: "Full Stack Developer",
         bio: "Rising Senior at Boston University studying Computer Science, passionate about creating impactful solutions.",
-        imageUrl: "/placeholder-1.jpg" // Add actual image paths
+        imageUrl: "ryan.jpg"
     },
     {
         name: "Ben Bucaj",
         role: "Full Stack Developer",
         bio: "Rising Senior at Boston University studying Computer Science, focused on building efficient and scalable applications.",
-        imageUrl: "/placeholder-2.jpg"
+        imageUrl: "ben.jpeg"
     },
     {
         name: "Jason Anghad",
