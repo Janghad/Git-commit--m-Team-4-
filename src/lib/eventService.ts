@@ -29,7 +29,9 @@ export async function fetchPublicEvents() {
         
         const { data, error } = await supabase
             .from("events")
-            .select(`*, profiles:organizer_id (full_name,email)`)
+            .select(`*, 
+                profiles:organizer_id (full_name, email), 
+                event_attendees:event_attendees (count)`) // Get the count of attendees
             .eq("is_public", true)
             .eq("status", "available")
             .order("start_time", { ascending: true });
@@ -95,44 +97,40 @@ export async function getUserRsvp(userId: string) {
     }
 
     export async function rsvpToEvent(eventId: string, userId: string) {
-        const {data: eventData, error:eventError} = await supabase
-        .from("events")
-        .select(`
-            id,
-            max_attendees,
-            event_attendees:event_attendees(count)
-            `)
-            .eq("id", eventId)
-            .single();
-
-        if (eventError) {
-            console.error("Unable to fetch event details:", eventError);
-            throw eventError;
+        try {
+            console.log("Attempting RSVP with:", { eventId, userId });
+            
+            // Directly try to insert the RSVP
+            const { error: insertError } = await supabase
+                .from("event_attendees")
+                .insert({
+                    event_id: eventId,
+                    user_id: userId,
+                    rsvp_time: new Date().toISOString()
+                });
+                
+            if (insertError) {
+                console.error("Insert error:", insertError);
+                
+                // Check for unique constraint violation (already RSVP'd)
+                if (insertError.code === '23505') {
+                    throw new Error("You have already RSVP'd to this event");
+                }
+                
+                throw new Error("Failed to RSVP to event");
+            }
+            
+            return true;
+        } catch (error) {
+            console.error("RSVP error:", error);
+            if (error instanceof Error) {
+                throw error;
+            } else {
+                throw new Error("An unexpected error occurred");
+            }
         }
-
-        //Checks current attendee count
-        const currentAttendeeCount = eventData?.event_attendees[0]?.count || 0;
-
-        //Checks if the event is full
-        if (eventData?.max_attendees !== null && currentAttendeeCount >= eventData.max_attendees) {
-            throw new Error("Event is full");
-        }
-
-        const {error} = await supabase
-        .from("event_attendees")
-        .insert({
-            event_id: eventId,
-            user_id: userId,
-            rsvp_time: new Date().toISOString()
-        });
-
-        if (error) {
-            console.error("Error RSVPing to event:", error);
-            throw error;
-        }
-
-        return true;
     }
+    
 
     export async function cancelRsvp(eventId: string, userId: string) {
         const {error} = await supabase
@@ -162,15 +160,15 @@ export async function getUserRsvp(userId: string) {
                 const startTime = new Date(record.start_time);
                 const endTime = new Date(record.end_time);
                 const timeRange = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+                const attendeeCount = record.event_attendees?
+                    record.event_attendees.length : (record.event_attendees?.count || 0);
 
                 return {
                     id: record.id,
                     title: record.title,
                     location: record.location,
                     time: timeRange,
-                    attendees: Array.isArray(record.event_attendees) 
-                        ? record.event_attendees.length 
-                        : (record.event_attendees?.count || 0),
+                    attendees: attendeeCount,
                     status: record.status,
                     coords: coords,
                     description: record.description || "",

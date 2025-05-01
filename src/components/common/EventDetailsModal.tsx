@@ -50,7 +50,7 @@ interface EventDetailsModalProps {
     onClose: () => void;
     event: DashboardEvent;
     isRsvpd: boolean;
-    onToggleRsvp: (eventId: number) => void;
+    onToggleRsvp: (eventId: string) => void;
     onEditEvent?: (event: DashboardEvent) => void;
 }
 
@@ -187,7 +187,7 @@ export default function EventDetailsModal({
                                 <div>
                                     <p className="text-sm font-medium text-zinc-400">Attendance</p>
                                     <RsvpButton 
-                                        eventId={Number(event.id)}  // Convert string ID to number here
+                                        eventId={event.id}  
                                         count={event.attendees}
                                         isRsvpd={isRsvpd}
                                         onToggle={onToggleRsvp}

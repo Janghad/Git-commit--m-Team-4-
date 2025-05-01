@@ -175,8 +175,12 @@ useEffect(() => {
         };
     };
 
-    const handleMarkerClick = (eventId: number) => {
-        const event = events.find(e => e.id === String(eventId));
+    const handleMarkerClick = (eventId: string) => {
+        const eventIdStr = String(eventId);
+        
+        // Find the event using string comparison
+        const event = events.find(e => e.id === eventIdStr);
+        
         if (event) {
             setSelectedEvent(event);
             setIsEventDetailsModalOpen(true);
@@ -208,29 +212,39 @@ useEffect(() => {
         setIsAddEventModalOpen(true);
     }
 
-    const hasUserRsvpd = (eventId: number): boolean => {
+    const hasUserRsvpd = (eventId: string): boolean => {
         return !!userRsvps[eventId];
     };
 
-    const handleToggleRsvp = async (eventId: number) => {
+
+    const handleToggleRsvp = async (eventId: string) => {
         if (!userId) {
             toast.error("You must be logged in to RSVP");
             return;
         }
-
+    
+        // Validate event ID
+        if (!eventId || eventId === 'NaN') {
+            toast.error("Invalid event ID. Please try again.");
+            return;
+        }
+    
         try {
             if (hasUserRsvpd(eventId)) {
-                await cancelRsvp(eventId.toString(), userId);
-
+                // CANCEL RSVP FLOW
+                await cancelRsvp(eventId, userId);
+                
+                // Update local state for UI
                 setUserRsvps(prev => {
                     const newState = {...prev};
                     delete newState[eventId];
                     return newState;
                 });
-
+                
+                // Update attendee count in UI
                 setEvents(prev => 
                     prev.map(event => {
-                        if (event.id.toString() === eventId.toString()) {
+                        if (event.id === eventId) {
                             return { 
                                 ...event, 
                                 attendees: Math.max(0, event.attendees - 1)
@@ -239,19 +253,16 @@ useEffect(() => {
                         return event;
                     })
                 );
-
-                toast.success("Your RSVP has been canceled",);
+                
+                toast.success("Your RSVP has been canceled");
             } else {
-                await rsvpToEvent(eventId.toString(), userId);
-
-                setUserRsvps(prev => ({
-                    ...prev,
-                    [eventId]: true
-                }));
-
-                setEvents(prev => 
+                // ADD RSVP FLOW
+                await rsvpToEvent(eventId, userId);
+                
+                //Update attendees on the front end
+                setEvents(prev =>
                     prev.map(event => {
-                        if (event.id.toString() === eventId.toString()) {
+                        if (event.id === eventId) {
                             return { 
                                 ...event, 
                                 attendees: event.attendees + 1
@@ -261,14 +272,55 @@ useEffect(() => {
                     })
                 );
 
+                // Update local state for UI
+                setUserRsvps(prev => ({
+                    ...prev,
+                    [eventId]: true
+                }));
+                
+                // Update attendee count in UI
+                setEvents(prev => 
+                    prev.map(event => {
+                        if (event.id === eventId) {
+                            return { 
+                                ...event, 
+                                attendees: event.attendees + 1
+                            };
+                        }
+                        return event;
+                    })
+                );
+                
                 toast.success("You have successfully RSVP'd to this event!");
             }
-        }catch (error) {
-            console.error("Error toggling RSVP", error);
-            toast.error("Failed to update RSVP status");
+        } catch (error) {
+            console.error("Error toggling RSVP:", error);
+            
+            // Show appropriate error message based on error type
+            if (error instanceof Error) {
+                switch(error.message) {
+                    case "Event is full":
+                        toast.error("This event has reached its maximum capacity");
+                        break;
+                    case "Event not found":
+                        toast.error("This event no longer exists");
+                        break;
+                    case "You have already RSVP'd to this event":
+                        // Refresh state to match database reality
+                        setUserRsvps(prev => ({
+                            ...prev,
+                            [eventId]: true
+                        }));
+                        toast("You're already on the attendee list for this event");
+                        break;
+                    default:
+                        toast.error(`Failed to update RSVP: ${error.message}`);
+                }
+            } else {
+                toast.error("Failed to update RSVP status. Please try again.");
+            }
         }
     };
-
 
     const getUserRsvpdEvents = (): DashboardEvent[] => {
         return events.filter(event => !!userRsvps[event.id]);
@@ -334,7 +386,7 @@ useEffect(() => {
                     {/* Map Section */}
                     <div className="flex-1 relative">
                         <Map 
-                            events={events.map(event => ({ ...event, id: Number(event.id) }))}
+                            events={events}
                             onMarkerClick={handleMarkerClick}
                             userPos={coords || undefined}
                         />
@@ -419,7 +471,7 @@ useEffect(() => {
                         setSelectedEvent(null);
                     }}
                     event={selectedEvent}
-                    isRsvpd={hasUserRsvpd(Number(selectedEvent.id))}
+                    isRsvpd={hasUserRsvpd(selectedEvent.id)}
                     onToggleRsvp={handleToggleRsvp}
                     onEditEvent={handleEditEvent}
                 />

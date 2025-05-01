@@ -25,29 +25,18 @@
  * ```
  */
 
+
 import React from 'react';
 import { CheckIcon, PlusIcon } from '@heroicons/react/24/outline';
 
-/**
- * Props for the RsvpButton component
- * @interface RsvpButtonProps
- * @property {number} eventId - The ID of the event
- * @property {number} count - Current number of attendees/RSVPs
- * @property {boolean} isRsvpd - Whether the current user has RSVP'd
- * @property {(eventId: number) => void} onToggle - Callback function when RSVP status is toggled
- * @property {boolean} [disabled] - Whether the button should be disabled (e.g., at max capacity)
- */
 interface RsvpButtonProps {
-    eventId: number;
+    eventId: string; // Accept either string or number
     count: number;
     isRsvpd: boolean;
-    onToggle: (eventId: number) => void;
+    onToggle: (eventId: string) => void; // Change to accept string
     disabled?: boolean;
 }
 
-/**
- * RSVP Button component that allows users to RSVP to events
- */
 export default function RsvpButton({ 
     eventId, 
     count, 
@@ -55,10 +44,23 @@ export default function RsvpButton({
     onToggle,
     disabled = false
 }: RsvpButtonProps) {
+    // Ensure eventId is a string and not NaN
+    const handleClick = () => {
+        const eventIdStr = String(eventId);
+        
+        // Check if eventId is valid before proceeding
+        if (eventIdStr === 'NaN' || !eventId) {
+            console.error("Invalid event ID:", eventId);
+            return;
+        }
+        
+        onToggle(eventIdStr);
+    };
+
     return (
         <div className="flex flex-col">
             <button
-                onClick={() => onToggle(eventId)}
+                onClick={handleClick}
                 disabled={disabled}
                 className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 
                     ${isRsvpd 
@@ -90,4 +92,4 @@ export default function RsvpButton({
             )}
         </div>
     );
-} 
+}

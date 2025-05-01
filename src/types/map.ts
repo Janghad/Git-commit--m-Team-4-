@@ -11,7 +11,7 @@
  * @property {[number, number]} coords - Geographic coordinates [longitude, latitude]
  */
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   location: string;
   distance?: string;
@@ -30,7 +30,7 @@ export interface Event {
  */
 export interface MapProps {
   events: Event[];
-  onMarkerClick: (eventId: number) => void;
+  onMarkerClick: (eventId: string) => void;
   userPos?: [number, number];
 }
 
