@@ -251,7 +251,7 @@ useEffect(() => {
 
                 setEvents(prev => 
                     prev.map(event => {
-                        if (Number(event.id) === eventId) {
+                        if (event.id.toString() === eventId.toString()) {
                             return { 
                                 ...event, 
                                 attendees: event.attendees + 1
