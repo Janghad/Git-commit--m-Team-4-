@@ -114,11 +114,12 @@ const Signup = () => {
 
     //Signing up with Google Authentication
     // try to sign up using supabase (email + password)
+    // Inside your signup page (src/app/signup/page.jsx)
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`, // Changed from /api/auth/callback
         data: {
           full_name: `${firstName} ${lastName}`,
           role: userType
