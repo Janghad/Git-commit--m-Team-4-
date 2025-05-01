@@ -284,7 +284,7 @@ useEffect(() => {
                         if (event.id === eventId) {
                             return { 
                                 ...event, 
-                                attendees: event.attendees + 1
+                                attendees: Math.max(0, event.attendees - 1)
                             };
                         }
                         return event;

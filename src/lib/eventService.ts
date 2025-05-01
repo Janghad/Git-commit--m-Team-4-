@@ -29,9 +29,11 @@ export async function fetchPublicEvents() {
         
         const { data, error } = await supabase
             .from("events")
-            .select(`*, 
-                profiles:organizer_id (full_name, email), 
-                event_attendees:event_attendees (count)`) // Get the count of attendees
+            .select(`
+                *,
+                profiles:organizer_id (full_name, email),
+                event_attendees!event_id (id)
+            `) // Get the count of attendees
             .eq("is_public", true)
             .eq("status", "available")
             .order("start_time", { ascending: true });
@@ -99,29 +101,47 @@ export async function getUserRsvp(userId: string) {
     export async function rsvpToEvent(eventId: string, userId: string) {
         try {
             console.log("Attempting RSVP with:", { eventId, userId });
+
+            const { data: eventData, error: eventError } = await supabase
+            .from("events")
+            .select(`
+                max_attendees,
+                event_attendees!event_id (id)
+            `)
+            .eq("id", eventId)
+            .single();
             
-            // Directly try to insert the RSVP
+            if (eventError) {
+                throw new Error("Event not found");
+            }
+
+            //Calculate the current number of attendees
+            const currentAttendees = eventData.event_attendees?.length || 0;
+
+            //Checks if the event is at capcity
+            if (eventData.max_attendees && currentAttendees >= eventData.max_attendees) {
+                throw new Error("Event is full");
+            }
+
             const { error: insertError } = await supabase
-                .from("event_attendees")
-                .insert({
-                    event_id: eventId,
-                    user_id: userId,
-                    rsvp_time: new Date().toISOString()
-                });
-                
+            .from("event_attendees")
+            .insert({
+                event_id: eventId,
+                user_id: userId,
+                rsvp_time: new Date().toISOString()
+            });
+                    
             if (insertError) {
                 console.error("Insert error:", insertError);
-                
-                // Check for unique constraint violation (already RSVP'd)
-                if (insertError.code === '23505') {
+
+                if(insertError.code === '23505') {
                     throw new Error("You have already RSVP'd to this event");
                 }
-                
+
                 throw new Error("Failed to RSVP to event");
             }
-            
-            return true;
-        } catch (error) {
+                return true;
+        }catch (error) {
             console.error("RSVP error:", error);
             if (error instanceof Error) {
                 throw error;
@@ -130,6 +150,7 @@ export async function getUserRsvp(userId: string) {
             }
         }
     }
+
     
 
     export async function cancelRsvp(eventId: string, userId: string) {
@@ -160,8 +181,9 @@ export async function getUserRsvp(userId: string) {
                 const startTime = new Date(record.start_time);
                 const endTime = new Date(record.end_time);
                 const timeRange = `${formatTime(startTime)} - ${formatTime(endTime)}`;
-                const attendeeCount = record.event_attendees?
-                    record.event_attendees.length : (record.event_attendees?.count || 0);
+                const attendeeCount = Array.isArray(record.event_attendees) 
+                ? record.event_attendees.length 
+                : 0;
 
                 return {
                     id: record.id,
