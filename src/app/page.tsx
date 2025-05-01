@@ -66,7 +66,7 @@ const teamMembers = [
  */
 const mockEvents: Event[] = [
     {
-        id: 1,
+        id: "1",
         title: "Computer Science Seminar",
         location: "CAS Building",
         time: "2:00 PM",
@@ -75,7 +75,7 @@ const mockEvents: Event[] = [
         coords: [-71.1097, 42.3505]
     },
     {
-        id: 2,
+        id: "2",
         title: "Engineering Workshop",
         location: "Photonics Center",
         time: "3:30 PM",
@@ -103,7 +103,7 @@ export default function LandingPage() {
      * Handles marker click events on the map
      * @param eventId - ID of the clicked event
      */
-    const handleMarkerClick = (eventId: number) => {
+    const handleMarkerClick = (eventId: string) => {
         console.log(`Clicked event: ${eventId}`);
     };
 
