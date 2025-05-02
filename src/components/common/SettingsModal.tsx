@@ -142,19 +142,6 @@ export default function SettingsModal({ isOpen, onClose, userData, onSignOut }: 
                             </div>
                         </div>
 
-                        {/* Password (placeholder) */}
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-300 mb-2">
-                                Password
-                            </label>
-                            <div className="w-full px-4 py-2 rounded-lg bg-zinc-700 text-white border border-zinc-600">
-                                ••••••••
-                            </div>
-                            <button className="mt-2 text-sm text-green-400 hover:text-green-300 transition-colors">
-                                Change Password
-                            </button>
-                        </div>
-
                         {/* Sign Out button */}
                         <button
                             onClick={handleSignOut}

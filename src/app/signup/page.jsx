@@ -44,9 +44,8 @@ const Signup = () => {
   const [isFacultyCodeModalOpen, setIsFacultyCodeModalOpen] = useState(false)
   const [isFacultyVerified, setIsFacultyVerified] = useState(false)
 
-  //Google Login Handler
+  /* Google Login Handler - Temporarily disabled
   // this is what happens if someone tries to sign in with google instead of the normal form
-
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -60,6 +59,7 @@ const Signup = () => {
       alert("Google login failed"); // something went wrong, just tell them
     }
   };
+  */
 
   const handleUserTypeChange = (type) => {
     if (type === "faculty") {
@@ -112,14 +112,12 @@ const Signup = () => {
       return
     }
 
-    //Signing up with Google Authentication
-    // try to sign up using supabase (email + password)
-    // Inside your signup page (src/app/signup/page.jsx)
+    //Signing up with Email Authentication
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`, // Changed from /api/auth/callback
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: `${firstName} ${lastName}`,
           role: userType
@@ -305,7 +303,7 @@ const Signup = () => {
             Create Account
           </button>
 
-          {/*Temp button for google authenticate / google login instead*/}
+          {/* Temporarily disabled Google sign-up button
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -313,6 +311,7 @@ const Signup = () => {
           >
             Continue with Google
           </button>
+          */}
 
           {/* link to go to login page if they already signed up */}
           <p className="text-center text-sm text-zinc-400">

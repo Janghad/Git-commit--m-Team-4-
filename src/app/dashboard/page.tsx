@@ -31,7 +31,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import EventDetailsModal from '@/components/common/EventDetailsModal';
 import MyEventsModal from '@/components/common/MyEventsModal';
-import FacultyCodeModal from '@/components/common/FacultyCodeModal';
 import { DIETARY_TAGS } from '@/constants/eventData';
 import toast from 'react-hot-toast';
 import { cancelRsvp, createEvent, rsvpToEvent } from '@/lib/eventService';
@@ -48,7 +47,6 @@ export default function Dashboard() {
     const router = useRouter();
     const { coords, error } = useUserLocation(); //get's users geographic location for the map
     const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
-    const [isFacultyCodeModalOpen, setIsFacultyCodeModalOpen] = useState(false);
     const [isEventDetailsModalOpen, setIsEventDetailsModalOpen] = useState(false);
     const [isMyEventsModalOpen, setIsMyEventsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<DashboardEvent | null>(null);
@@ -206,11 +204,6 @@ useEffect(() => {
     const handleHomeClick = () => {
         router.push('/');
     };
-
-    const handleFacultyCodeSuccess = () => {
-        setIsFacultyCodeModalOpen(false);
-        setIsAddEventModalOpen(true);
-    }
 
     const hasUserRsvpd = (eventId: string): boolean => {
         return !!userRsvps[eventId];
@@ -371,7 +364,7 @@ useEffect(() => {
                     
                     {userRole === "faculty" && (
                         <button
-                            onClick={() => setIsFacultyCodeModalOpen(true)}
+                            onClick={() => setIsAddEventModalOpen(true)}
                             className="flex items-center text-white hover:text-green-400 mt-8 transition-colors w-full text-left"
                         >
                             <PlusIcon className="w-5 h-5 mr-3" />
@@ -447,13 +440,6 @@ useEffect(() => {
                     </div>
                 </div>
             </div>
-
-            {/* Faculty Code Modal */}
-            <FacultyCodeModal
-                isOpen={isFacultyCodeModalOpen}
-                onClose={() => setIsFacultyCodeModalOpen(false)}
-                onSuccess={handleFacultyCodeSuccess}
-            />
 
             {/* Add Event Modal */}
             <AddEventModal
