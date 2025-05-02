@@ -43,13 +43,13 @@ const teamMembers = [
         name: "Jason Anghad",
         role: "Full Stack Developer",
         bio: "Senior at Boston University studying Computer Science, dedicated to developing innovative software solutions.",
-        imageUrl: "/placeholder-3.jpg"
+        imageUrl: "jaosn.jpeg"
     },
     {
         name: "Nicole Lin",
         role: "Full Stack Developer",
         bio: "Rising Senior at Boston University studying Computer Science, enthusiastic about creating user-centric applications.",
-        imageUrl: "/placeholder-4.jpg"
+        imageUrl: "nicole.JPG"
     }
 ];
 
