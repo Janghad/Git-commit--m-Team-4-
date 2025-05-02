@@ -35,7 +35,7 @@ import { DIETARY_TAGS } from '@/constants/eventData';
 import toast from 'react-hot-toast';
 import { cancelRsvp, createEvent, rsvpToEvent } from '@/lib/eventService';
 import {fetchPublicEvents} from '@/lib/eventService';
-import { profile } from 'console';
+import { profile, time } from 'console';
 
 
 
@@ -68,7 +68,7 @@ useEffect(() => {
                 const {data: profile, error: profileError} = await supabase
                     .from("profiles")
                     .select("role, id")
-                    .eq("auth_id", userId)
+                    .eq("auth_id", user.id)
                     .single();
 
                 if (profile && !profileError) {
@@ -125,14 +125,15 @@ useEffect(() => {
                 return;
             }
 
-            // If this is their first login, don't show notifications
-            if (!profile.last_login) return;
+            const timeThreshold = profile.last_login
+                ? profile.last_login
+                : new Date (Date.now() -7 * 24 * 60 * 60 * 1000).toISOString(); // Default to 7 days ago if last_login is null    
     
             // Get events created since last login
             const { data: newEvents, error: eventsError } = await supabase
                 .from("events")
                 .select("id, title, location")
-                .gt("created_at", profile.last_login)
+                .gt("created_at", timeThreshold)
                 .order("created_at", { ascending: false });
 
             if (eventsError) {
@@ -159,8 +160,6 @@ useEffect(() => {
             console.error("Error checking for new events:", error);
         }
     };
-
-    checkForNewEvents();
 
     // Set up realtime subscription
     const eventsNotification = supabase
