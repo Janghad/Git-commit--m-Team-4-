@@ -118,11 +118,12 @@ const Login = () => {
         
         router.push("/dashboard");
       }
-        const {data:profile, error:profileError} = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("auth_id", data.user.id)
-          .single()
+
+      const {data:profile, error:profileError} = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("auth_id", data.user.id)
+        .single();
 
         //PGRST116 is an error code from PostgREST used by Supabase that essentially means no results found
         if (profileError && profileError.code !== 'PGRST116') {
@@ -137,9 +138,9 @@ const Login = () => {
           router.push("/dashboard")
         }
       }
-    } catch (error) {
+    catch (error) {
       console.error("Login failed:", error)
-      setError(error.message || "Login failed. Please check your credentials.")
+      setError(error.message || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false)
     }
