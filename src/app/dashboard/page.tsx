@@ -35,6 +35,7 @@ import { DIETARY_TAGS } from '@/constants/eventData';
 import toast from 'react-hot-toast';
 import { cancelRsvp, createEvent, rsvpToEvent } from '@/lib/eventService';
 import {fetchPublicEvents} from '@/lib/eventService';
+import { profile } from 'console';
 
 
 
@@ -67,7 +68,7 @@ useEffect(() => {
                 const {data: profile, error: profileError} = await supabase
                     .from("profiles")
                     .select("role, id")
-                    .eq("auth_id", user.id)
+                    .eq("auth_id", userId)
                     .single();
 
                 if (profile && !profileError) {
@@ -104,6 +105,57 @@ useEffect(() => {
     // Call the fetch function - wrapped in an immediate function to avoid
     // using await directly in useEffect
     fetchUserAndEvents();
+
+    const checkForNewEvents = async () => {
+        try {
+          // Get the user's profile with last_login
+            const { data: profile, error: profileError } = await supabase
+                .from("profiles")
+                .select("last_login")
+                .eq("auth_id", userId)
+                .single();
+
+            if (profileError || !profile) {
+            console.error("Error fetching profile:", profileError);
+            return;
+            }
+
+            // If this is their first login, don't show notifications
+            if (!profile.last_login) return;
+    
+            // Get events created since last login
+            const { data: newEvents, error: eventsError } = await supabase
+                .from("events")
+                .select("id, title, location")
+                .gt("created_at", profile.last_login)
+                .order("created_at", { ascending: false });
+
+            if (eventsError) {
+                console.error("Error fetching new events:", eventsError);
+                return;
+            }
+
+            if (newEvents && newEvents.length > 0) {
+                if (newEvents.length > 3) {
+                    toast(`${newEvents.length} new food events have been added since your last visit!`, {
+                        icon: '🍔',
+                        duration: 5000,
+                    });
+                } else{
+                    newEvents.forEach(event => {
+                        toast(`New event: ${event.title} at ${event.location}`, {
+                            icon: '🍔',
+                            duration: 5000,
+                        });
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error checking for new events:", error);
+        }
+    };
+
+    checkForNewEvents();
 
     // Set up realtime subscription
     const eventsNotification = supabase

@@ -107,6 +107,17 @@ const Login = () => {
 
       //Checks if the user exists in the custom profiles table
       if(data?.user) {
+        const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ last_login: new Date().toISOString() })
+        .eq("auth_id", data.user.id);
+      
+        if (updateError) {
+          console.error("Failed to update last login time:", updateError);
+        }
+        
+        router.push("/dashboard");
+      }
         const {data:profile, error:profileError} = await supabase
           .from("profiles")
           .select("*")
