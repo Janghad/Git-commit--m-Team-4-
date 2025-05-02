@@ -1,216 +1,161 @@
-# Spark!Bytes - BU Food Surplus Management System
+# Spark!Bytes 🍽️
 
-## Project Overview
-Spark!Bytes is a software application system developed for Boston University (BU) that facilitates the access and management of surplus food from various BU events and sources. The core idea is to reduce food waste and ensure that extra food reaches eligible BU constituents in a timely and organized fashion.
+[![Next.js](https://img.shields.io/badge/Next.js-15.2.4-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.0.0-blue?style=flat-square&logo=react)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.49.4-green?style=flat-square&logo=supabase)](https://supabase.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 
-## Project Structure
-```
-src/
-├── app/                    # Next.js app directory (pages and layouts)
-│   ├── (auth)/            # Authentication related pages
-│   │   ├── login/
-│   │   └── signup/
-│   ├── (dashboard)/       # Protected dashboard routes
-│   │   ├── food/          # Food management
-│   │   ├── notifications/ # Notification center
-│   │   └── profile/       # User profile
-│   └── api/               # API routes
-├── components/            # Reusable UI components
-│   ├── common/           # Shared components (buttons, inputs, etc.)
-│   │   └── AddEventModal.tsx # Modal for creating new events
-│   ├── food/             # Food-related components
-│   ├── layout/           # Layout components (header, footer, etc.)
-│   └── notifications/    # Notification components
-├── lib/                  # Utility functions and shared logic
-│   ├── supabase/        # Supabase client and utilities
-│   ├── auth/            # Authentication utilities
-│   └── api/             # API utilities
-├── hooks/               # Custom React hooks
-├── types/               # TypeScript type definitions
-├── styles/              # Global styles and theme
-└── constants/           # Constants and configuration
+## Overview
 
-```
+Spark!Bytes is a modern web application developed for Boston University (BU) that revolutionizes the management and distribution of surplus food from campus events. Our mission is to reduce food waste while ensuring that excess food reaches those who need it most within the BU community.
+
+### Core Features
+
+- 🗺️ **Interactive Campus Map**: Real-time visualization of food events across BU campus
+- 🔔 **Smart Notifications**: Instant alerts for new events and RSVP updates
+- 👥 **Role-Based Access**: Separate interfaces for students and faculty
+- 📱 **Responsive Design**: Seamless experience across all devices
+- 🔒 **Secure Authentication**: Supabase-powered authentication system
+- 📊 **Real-time Updates**: Live event status and RSVP tracking
+
+## Tech Stack
+
+### Frontend
+- **Framework**: Next.js 15.2.4 with React 19
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with Headless UI
+- **State Management**: React Context + Local State
+- **Maps**: Mapbox GL JS
+- **Notifications**: React Hot Toast
+
+### Backend
+- **Database**: Supabase (PostgreSQL)
+- **Authentication**: Supabase Auth
+- **API**: Next.js API Routes
+- **Real-time**: Supabase Realtime
+
+### Development Tools
+- **Package Manager**: npm
+- **Linting**: ESLint
+- **Testing**: Jest + React Testing Library
+- **Build Tool**: Turbopack
+- **Type Checking**: TypeScript
 
 ## Getting Started
 
-1. Clone the repository
+### Prerequisites
+
+- Node.js 18.17 or later
+- npm 9.0 or later
+- Supabase account
+- Mapbox account
+
+### Environment Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Janghad/Git-commit--m-Team-4-.git
+   cd sparkbytes
+   ```
+
 2. Install dependencies:
    ```bash
    npm install
    ```
-3. Set up environment variables:
-   ```bash
-   cp .env.example .env.local
+
+3. Create a `.env.local` file with the following variables:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
    ```
-4. Run the development server:
+
+### Development
+
+1. Start the development server:
    ```bash
    npm run dev
    ```
 
-## Development Dependencies
+2. Run tests:
+   ```bash
+   npm test
+   ```
 
-The project uses TypeScript for type safety and better development experience. The following type definitions are required:
+3. Lint code:
+   ```bash
+   npm run lint
+   ```
 
-```bash
-npm install --save-dev @types/react @types/react-dom @types/node
+### Production Build
+
+1. Create a production build:
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+   ```bash
+   npm run start
+   ```
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js app directory
+│   ├── (auth)/            # Authentication pages
+│   ├── (dashboard)/       # Protected dashboard routes
+│   └── api/               # API routes
+├── components/            # React components
+│   ├── common/           # Shared components
+│   ├── food/             # Food-related components
+│   ├── layout/           # Layout components
+│   └── notifications/    # Notification components
+├── lib/                  # Utility functions
+├── hooks/               # Custom React hooks
+├── types/               # TypeScript definitions
+└── constants/           # Project constants
 ```
 
-These packages provide TypeScript type definitions for:
-- React (`@types/react`)
-- React DOM (`@types/react-dom`)
-- Node.js (`@types/node`)
+## Key Features
 
-## Development Guidelines
-
-### Component Structure
-- Place reusable components in `components/`
-- Group related components in subdirectories
-- Use index files for clean exports
-
-### State Management
-- Use React Context for global state
-- Use local state for component-specific state
-- Use Supabase for persistent data
-
-## Team Responsibilities
-
-### Frontend Development
-- UI/UX implementation
-- Component development
-- State management
-- API integration
-
-### Backend Development
-- Supabase setup and configuration
-- Database schema design
-- API route implementation
-- Authentication system
-
-### Testing
-- Unit tests for components
-- Integration tests for features
-- E2E tests for critical paths
-
-## Available Scripts
-- `npm run dev`: Start development server
-- `npm run build`: Build for production
-- `npm run start`: Start production server
-- `npm run lint`: Run ESLint
-- `npm run test`: Run tests
-
-## Mapbox Integration
-
-The project uses Mapbox GL JS for interactive campus mapping and event visualization. The map component provides real-time updates of food events and building statuses across the BU campus.
-
-### Mapbox Features
-- Interactive campus map with custom styling
-- Real-time event markers with status indicators
-- Dynamic lighting based on time of day (dawn, day, dusk, night)
+### Interactive Map
+- Real-time event visualization
+- Dynamic lighting based on time of day
 - User location tracking
-- Building status visualization
 - Custom markers for different event types
 
-### Setup
-1. Create a Mapbox account and obtain an access token
-2. Add your Mapbox token to `.env.local`:
-   ```
-   NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token_here
-   ```
+### Event Management
+- Create and edit events (faculty only)
+- RSVP system with capacity tracking
+- Real-time status updates
+- Location-based event discovery
 
-### Map Component Usage
-```typescript
-import Map from '@/components/map/Map';
+### User System
+- Role-based access control
+- Profile management
+- Dietary preferences
+- Event history
 
-// Example usage
-<Map 
-  events={events}
-  onMarkerClick={(eventId) => handleMarkerClick(eventId)}
-  userPos={[latitude, longitude]}
-/>
-```
+## Contributing
 
-### Map Status Indicators
-- 🟢 Green: Available events/food
-- 🟡 Amber: Upcoming events
-- 🔴 Red: Unavailable/closed events
 
-### Map Controls
-- Reset View: Returns to default campus view
-- Time-based Lighting: Automatically adjusts map lighting based on time of day
-- Interactive Markers: Click markers to view event details
 
-## Add Event Feature
 
-The Add Event feature allows faculty and administrators to create new food events through an intuitive modal interface. This feature is integrated into the dashboard and provides a seamless way to manage campus food events.
 
-### Features
-- Modal-based event creation form
-- Real-time form validation
-- Multiple food offering selection
-- Location input with autocomplete
-- Time and date selection
-- Responsive design
-- Accessibility support
 
-### Component Usage
-```typescript
-import AddEventModal from '@/components/common/AddEventModal';
 
-// Example usage
-<AddEventModal
-  isOpen={isModalOpen}
-  onClose={() => setIsModalOpen(false)}
-  onSubmit={(eventData) => handleEventCreation(eventData)}
-/>
-```
+## Team
 
-### Form Fields
-1. **Event Title**
-   - Required field
-   - Text input with validation
-   - Maximum length: 100 characters
+- Ryan Rodriguez - Full Stack Developer
+- Ben Bucaj - Full Stack Developer
+- Jason Anghad - Full Stack Developer
+- Nicole Lin - Full Stack Developer
 
-2. **Event Time**
-   - Required field
-   - DateTime picker
-   - Future dates only
+## License
 
-3. **Food Offerings**
-   - Required field
-   - Multiple selection dropdown
-   - Options: Snacks, Lunch, Beverages, Dessert
+This project is proprietary and confidential. All rights reserved.
 
-4. **Location**
-   - Required field
-   - Text input with validation
-   - Autocomplete suggestions (future enhancement)
 
-### Validation Rules
-- All fields are required
-- Event title must be between 3-100 characters
-- Event time must be in the future
-- At least one food offering must be selected
-- Location must be a valid campus location
-
-### Accessibility Features
-- ARIA labels for all form fields
-- Error messages with proper ARIA attributes
-- Keyboard navigation support
-- Focus management
-- Screen reader compatibility
-
-### Styling
-- Consistent with application theme
-- Responsive design for all screen sizes
-- Clear visual feedback for validation states
-- Smooth animations and transitions
-- Proper contrast ratios for accessibility
-
-### Integration
-The Add Event feature is integrated with:
-- Dashboard navigation
-- Map component for location visualization
-- Event list for immediate updates
-- Form validation system
-- Error handling system
