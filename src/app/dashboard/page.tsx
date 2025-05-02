@@ -109,15 +109,20 @@ useEffect(() => {
     const checkForNewEvents = async () => {
         try {
           // Get the user's profile with last_login
+            // First, get the current user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+            
+            // Get the user's profile with last_login
             const { data: profile, error: profileError } = await supabase
                 .from("profiles")
                 .select("last_login")
-                .eq("auth_id", userId)
+                .eq("auth_id", user.id) // Use user.id directly from auth instead of userId state
                 .single();
-
+            
             if (profileError || !profile) {
-            console.error("Error fetching profile:", profileError);
-            return;
+                console.error("Error fetching profile:", profileError);
+                return;
             }
 
             // If this is their first login, don't show notifications

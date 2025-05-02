@@ -111,11 +111,11 @@ const Login = () => {
         .from("profiles")
         .update({ last_login: new Date().toISOString() })
         .eq("auth_id", data.user.id);
-      
+        
         if (updateError) {
           console.error("Failed to update last login time:", updateError);
         }
-        
+          
         router.push("/dashboard");
       }
 
