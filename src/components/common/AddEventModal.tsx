@@ -27,6 +27,7 @@ import { XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { BUILDINGS, DIETARY_TAGS } from '@/constants/eventData';
 import { EventFormData, EventFormErrors, EventFormProps, FoodOffering } from '@/types/event';
 import { toast } from 'react-hot-toast';
+import { toLocalDateTimeValue } from '@/utils/date';
 
 /**
  * Props for the AddEventModal component
@@ -287,8 +288,14 @@ export default function AddEventModal({ isOpen, onClose, onSubmit, initialData }
                                 <input
                                     type="datetime-local"
                                     id="startDateTime"
-                                    value={formData.startDateTime.toISOString().slice(0, 16)}
-                                    onChange={(e) => setFormData({ ...formData, startDateTime: new Date(e.target.value) })}
+                                    value={formData.startDateTime instanceof Date ? toLocalDateTimeValue(formData.startDateTime) : toLocalDateTimeValue(new Date())}
+                                    onChange={(e) => {
+                                        const newDate = new Date(e.target.value);
+                                        // Ensure we're creating a valid date object with the correct time
+                                        if (!Number.isNaN(newDate.getTime())) {
+                                            setFormData({ ...formData, startDateTime: newDate });
+                                        }
+                                    }}
                                     className={`w-full px-4 py-2 rounded-lg border ${
                                         errors.startDateTime ? 'border-red-500' : 'border-zinc-600'
                                     } focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -297,22 +304,28 @@ export default function AddEventModal({ isOpen, onClose, onSubmit, initialData }
                                     <p className="mt-1 text-sm text-red-500">{errors.startDateTime}</p>
                                 )}
                             </div>
-                        <div>
+                            <div>
                                 <label htmlFor="endDateTime" className="block text-sm font-medium text-zinc-300 mb-2">
                                     End Date & Time
-                            </label>
-                            <input
-                                type="datetime-local"
+                                </label>
+                                <input
+                                    type="datetime-local"
                                     id="endDateTime"
-                                    value={formData.endDateTime.toISOString().slice(0, 16)}
-                                    onChange={(e) => setFormData({ ...formData, endDateTime: new Date(e.target.value) })}
+                                    value={formData.endDateTime instanceof Date ? toLocalDateTimeValue(formData.endDateTime) : toLocalDateTimeValue(new Date())}
+                                    onChange={(e) => {
+                                        const newDate = new Date(e.target.value);
+                                        // Ensure we're creating a valid date object with the correct time
+                                        if (!Number.isNaN(newDate.getTime())) {
+                                            setFormData({ ...formData, endDateTime: newDate });
+                                        }
+                                    }}
                                     className={`w-full px-4 py-2 rounded-lg border ${
                                         errors.endDateTime ? 'border-red-500' : 'border-zinc-600'
-                                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                            />
+                                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                />
                                 {errors.endDateTime && (
                                     <p className="mt-1 text-sm text-red-500">{errors.endDateTime}</p>
-                            )}
+                                )}
                             </div>
                         </div>
 
