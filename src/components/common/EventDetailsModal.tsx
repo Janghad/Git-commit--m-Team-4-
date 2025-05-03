@@ -35,16 +35,7 @@ import RsvpButton from './RsvpButton';
 import supabase from '@/lib/supabaseClient';
 import toast from 'react-hot-toast';
 
-/**
- * Props for the EventDetailsModal component
- * @interface EventDetailsModalProps
- * @property {boolean} isOpen - Controls the visibility of the modal
- * @property {() => void} onClose - Callback function to close the modal
- * @property {DashboardEvent} event - The event object containing all event details
- * @property {boolean} isRsvpd - Whether the current user has RSVP'd to this event
- * @property {(eventId: number) => void} onToggleRsvp - Callback to toggle RSVP status
- * @property {(event: DashboardEvent) => void} onEditEvent - Callback to edit the event
- */
+
 interface EventDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;

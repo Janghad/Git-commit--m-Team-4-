@@ -58,7 +58,6 @@ export default function Dashboard() {
     const [userId, setUserId] = useState<string | null>(null);
 
     // Load RSVPs from localStorage on component mount
-    // Replace your entire useEffect block with this corrected version
 useEffect(() => {
     const fetchUserAndEvents = async () => {
         setIsLoading(true);
@@ -160,6 +159,8 @@ useEffect(() => {
             console.error("Error checking for new events:", error);
         }
     };
+
+    checkForNewEvents();
 
     // Set up realtime subscription
     const eventsNotification = supabase

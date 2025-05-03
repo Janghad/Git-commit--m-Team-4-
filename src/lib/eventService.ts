@@ -102,39 +102,39 @@ export async function getUserRsvp(userId: string) {
         try {
             console.log("Attempting RSVP with:", { eventId, userId });
 
-            const { data: eventData, error: eventError } = await supabase
+            const { data: eventData, error: eventError } = await supabase //checks if the events is at capacity
             .from("events")
             .select(`
                 max_attendees,
                 event_attendees!event_id (id)
             `)
-            .eq("id", eventId)
-            .single();
+            .eq("id", eventId) //finds the specific event
+            .single(); //expects only one event
             
-            if (eventError) {
+            if (eventError) { //appears if event cannot be found
                 throw new Error("Event not found");
             }
 
-            //Calculate the current number of attendees
+            //calculate the current number of attendees
             const currentAttendees = eventData.event_attendees?.length || 0;
 
-            //Checks if the event is at capcity
+            //checks if the event is at capcity
             if (eventData.max_attendees && currentAttendees >= eventData.max_attendees) {
                 throw new Error("Event is full");
             }
 
-            const { error: insertError } = await supabase
+            const { error: insertError } = await supabase //inserts new RSVP into the database in the event_attendees joint table
             .from("event_attendees")
             .insert({
                 event_id: eventId,
                 user_id: userId,
-                rsvp_time: new Date().toISOString()
+                rsvp_time: new Date().toISOString() //stores the timestamp of rsvp
             });
                     
             if (insertError) {
                 console.error("Insert error:", insertError);
 
-                if(insertError.code === '23505') {
+                if(insertError.code === '23505') { //postgreSql function that checks for duplicate entries
                     throw new Error("You have already RSVP'd to this event");
                 }
 
